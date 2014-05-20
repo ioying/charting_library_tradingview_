@@ -1,2 +1,4 @@
-charting_library
+TV Charting Library
 ================
+
+This repository contains Charting Library documentation.
