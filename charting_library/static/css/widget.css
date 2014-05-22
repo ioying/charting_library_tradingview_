@@ -1,0 +1,222 @@
+html, body {background: none; overflow: hidden; min-width: 240px; height: 100%;}
+
+#widget-container
+{
+	border: 1px solid #D9DADB;
+	background: #fff;
+}
+#widget-container #showExtendedHoursLink {
+	display: none;
+}
+
+#widget-container .header-chart-panel {
+	min-height: 0px;
+}
+#widget-container .pane-legend-line.main .pane-legend-icon.format {display: none;}
+
+.insert-study-dialog.minimized
+{
+	width: 480px;
+}
+.insert-study-dialog.minimized .insert-study-tabs
+{
+	display: none;
+}
+.insert-study-dialog.scrollbar.minimized
+{
+	width: 498px;
+}
+.minimized .insert-study-items li
+{
+	width: 140px; height: 13px;
+	padding: 8px 5px;
+	/*font-size: 10px;*/
+	font-size: 12px;
+
+	white-space: nowrap;
+	overflow: hidden; text-overflow: ellipsis;
+}
+.minimized .insert-study-items li:hover
+{
+	overflow: visible;
+	z-index: 18;
+	position: relative;
+	width: auto;
+	min-width: 140px;
+}
+.minimized .insert-study-items li .fav
+{
+	display: none;
+}
+
+.minimized .insert-study-pages { width: 480px; }
+.minimized .insert-study-pages .search-header { padding-left: 4px; }
+.minimized .insert-study-items ul.column { width: 150px; }
+.minimized  .search-header{ display: none; }
+
+.on-widget .getimage 
+{
+	margin-left: 4px;
+	padding: 7px;
+}
+
+.on-widget .widgetbar-widget-hotlist .widgetbar-widgetheader .widgetbar-headerspace {
+	display: none;
+}
+
+.onchart-tv-logo,
+.onchart-cme-logo {
+	display: block;
+	position: absolute;
+	left: 10px; bottom: 25px;
+	z-index: 10;
+	width: 135px;
+}
+
+/* hover state */
+.onchart-tv-logo {
+	width: auto;
+	bottom: 31px;
+}
+
+.onchart-tv-logo .wrapper {
+	display: block;
+	padding: 3px;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	-webkit-transition: background 0.6s ease;
+	-moz-transition: width 0.3s ease;
+	-ms-transition: width 0.3s ease;
+	-o-transition: width 0.3s ease;
+	transition: width 0.3s ease;
+}
+.onchart-tv-logo.expanded .wrapper {
+	background-color: rgba(256, 255, 255, 0.3);
+}
+.onchart-tv-logo .inner {
+	display: block;
+	height: 32px;
+	line-height: 32px;
+	padding: 0 9px;
+	-webkit-transition: background 0.6s ease;
+	-moz-transition: background 0.6s ease;
+	-ms-transition: background 0.6s ease;
+	-o-transition: background 0.6s ease;
+	transition: background 0.6s ease;
+}
+.onchart-tv-logo.expanded .inner {
+	background-color: rgba(256, 255, 255, 0.8);
+}
+.onchart-tv-logo img {
+	width: 33px;
+	height: 23px;
+	display: inline-block;
+	vertical-align: middle;
+}
+.onchart-tv-logo .text {
+	display: inline-block;
+	width: 0px;
+	overflow: hidden;
+	padding-left: 4px;
+	vertical-align: middle;
+	-webkit-transition: width 0.3s ease;
+	-moz-transition: width 0.3s ease;
+	-ms-transition: width 0.3s ease;
+	-o-transition: width 0.3s ease;
+	transition: width 0.3s ease;
+}
+.onchart-tv-logo.expanded .text {
+	width: 145px; /* not 'auto' because of transition */
+}
+.onchart-tv-logo img.faded {display: inline-block;}
+.onchart-tv-logo.expanded img.faded {display: none;}
+.onchart-tv-logo img.solid {display: none;}
+.onchart-tv-logo.expanded img.solid {display: inline-block;}
+
+.onchart-tv-logo .text .logo-highlighted {
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+/* /hover state*/
+
+
+
+.onchart-cme-logo img {
+	width: inherit;
+	opacity: 0.55;
+}
+.onchart-cme-logo a.onchart-logo {
+	width: inherit;
+	white-space: nowrap;
+	position: relative;
+	top: -6px;
+	left: 0px;
+	color: #007FB9;
+	opacity: 0.7;
+	font-size: 12px;
+}
+.onchart-cme-logo a.onchart-logo .logo-fade {
+	color: #231f20;
+	opacity: 0.85;
+}
+
+.on-cme-widget .symbol-search-dialog .filter,
+.on-cme-widget .symbol-edit-popup    .filter,
+.on-cme-widget .compare-widget .predefine-section,
+.on-cme-widget .compare-widget .vspace {
+	display: none;
+}
+.on-cme-widget .symbol-search-dialog .results { height: 450px; }
+
+.tv-embed-buttons-contaner {
+	float:right;
+	padding-top: 3px;
+}
+
+/* cme get image button */
+.on-cme-widget .getimage:hover {
+	background: #5ECE93;
+}
+
+/* get image icon on side toolbar */
+.on-cme-widget .tv-side-toolbar > .cme-saveimage-container {
+	position: absolute;
+	left: 1px; bottom: 1px;
+	height: 38px;
+	width: 50px;
+	background: #FFFFFF;
+}
+.on-cme-widget .tv-side-toolbar > .cme-saveimage-container:before {
+	content: '';
+
+	display: block;
+	width: 100%; height: 5px;
+
+	position: absolute;
+	top: -5px; left: 0;
+
+	background: -moz-linear-gradient(top,  rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0)), color-stop(100%,rgba(255,255,255,1)));
+	background: -webkit-linear-gradient(top,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%);
+	background: -o-linear-gradient(top,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%);
+	background: -ms-linear-gradient(top,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%);
+	background: linear-gradient(to bottom,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00ffffff', endColorstr='#ffffff',GradientType=0 );
+}
+.on-cme-widget .tv-side-toolbar > .cme-saveimage-container .getimage {
+	margin: 6px 11px;
+}
+
+/* get image icon without side toolbar */
+.on-cme-widget #widget-container > .cme-saveimage-container {
+	position: absolute;
+	left: 8px;
+	bottom: 7px;
+}
+.on-cme-widget #widget-container > .cme-saveimage-container .getimage {
+	margin: 0;
+	padding: 3px 7px 2px 6px;
+	border: none;
+}

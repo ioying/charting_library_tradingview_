@@ -1,0 +1,39 @@
+<html>
+	<head>
+
+		<title>TradingView Charting Library demo</title>
+
+		<script type="text/javascript" src="charting_library/charting_library.js"></script>
+		<script type="text/javascript" src="charting_library/datafeed/udf/datafeed.js"></script>
+
+		<script type="text/javascript" src="//code.jquery.com/jquery-2.1.0.min.js"></script>
+
+		<script type="text/javascript">
+
+			TradingView.onready(function()
+			{
+				var widget = new TradingView.widget({
+					width: '100%',
+					height: '100%',
+					symbol: 'AAPL',
+					interval: 'D',
+					toolbar_bg: '#f4f7f9',
+					allow_symbol_change: true,
+					container_id: "tv_chart_container",
+					//	BEWARE: no trailing slash is expected in feed URL
+					datafeed: new Datafeeds.UDFCompatibleDatafeed("http://demo_feed.tradingview.com"),
+					library_path: "charting_library/",
+					//	Regression Trend-related functionality is not implemented yet, so it's hidden for a while
+					disabled_drawings: ["Regression Trend"]
+				});
+			})
+
+		</script>
+
+	</head>
+
+	<body style="margin:0px;">
+		<div id="tv_chart_container"></div>
+	</body>
+
+</html>
