@@ -1,3 +1,5 @@
+/* Don't forget to invalidate CloudFront cache for '../css/widget.css' via invalidate_cloudfront_widgets.py */
+
 html, body {background: none; overflow: hidden; min-width: 240px; height: 100%;}
 
 #widget-container
@@ -54,10 +56,24 @@ html, body {background: none; overflow: hidden; min-width: 240px; height: 100%;}
 .minimized .insert-study-items ul.column { width: 150px; }
 .minimized  .search-header{ display: none; }
 
-.on-widget .getimage 
+.on-widget .getimage,
+.on-widget .open-popup
 {
 	margin-left: 4px;
 	padding: 7px;
+}
+
+.on-widget .open-popup {
+	border: none;
+	background: #6798BB;
+}
+.on-widget .open-popup:hover { background: #69A3CC; }
+.on-widget .open-popup:active { background: #71ACD6; }
+.on-widget .open-popup i {
+	width: 16px;
+	height: 14px;
+	background-image: url("../images/icons.png");
+	background-position: -180px -400px;
 }
 
 .on-widget .widgetbar-widget-hotlist .widgetbar-widgetheader .widgetbar-headerspace {
@@ -65,18 +81,23 @@ html, body {background: none; overflow: hidden; min-width: 240px; height: 100%;}
 }
 
 .onchart-tv-logo,
-.onchart-cme-logo {
+.onchart-cme-logo,
+.onchart-custom-logo {
 	display: block;
 	position: absolute;
-	left: 10px; bottom: 25px;
 	z-index: 10;
-	width: 135px;
 }
 
-/* hover state */
-.onchart-tv-logo {
+.onchart-cme-logo {
+	left: 10px;
+	bottom: 25px;
+	width: 135px;
+}
+.onchart-tv-logo,
+.onchart-custom-logo {
+	left: 1px;
+	bottom: 22px;
 	width: auto;
-	bottom: 31px;
 }
 
 .onchart-tv-logo .wrapper {
@@ -85,54 +106,100 @@ html, body {background: none; overflow: hidden; min-width: 240px; height: 100%;}
 	-webkit-border-radius: 3px;
 	-moz-border-radius: 3px;
 	border-radius: 3px;
-	-webkit-transition: background 0.6s ease;
-	-moz-transition: width 0.3s ease;
-	-ms-transition: width 0.3s ease;
-	-o-transition: width 0.3s ease;
-	transition: width 0.3s ease;
+	-webkit-transition: background 0.7s ease;
+	-moz-transition: width 0.7s ease;
+	-ms-transition: width 0.7s ease;
+	-o-transition: width 0.7s ease;
+	transition: width 0.7s ease;
+	-webkit-transition: background 0.7s ease;
+	-moz-transition: background 0.7s ease;
+	-ms-transition: background 0.7s ease;
+	-o-transition: background 0.7s ease;
+	transition: background 0.7s ease;
 }
 .onchart-tv-logo.expanded .wrapper {
-	background-color: rgba(256, 255, 255, 0.3);
+	background-color: rgba(255, 255, 255, 0.3);
 }
+.onchart-tv-logo.expanded.grey .wrapper {
+	background-color: rgba(255, 255, 255, 0.3);
+}
+.onchart-tv-logo.expanded.blue .wrapper {
+	background-color: rgba(255, 255, 255, 0.3);
+}
+
+.onchart-tv-logo.black .wrapper {
+	background-color: rgba(0, 0, 0, 0.3);
+}
+.onchart-tv-logo.expanded.black .wrapper {
+	background-color: rgba(255, 255, 255, 0.3);
+}
+
 .onchart-tv-logo .inner {
 	display: block;
 	height: 32px;
-	line-height: 32px;
+	line-height: 31px;
 	padding: 0 9px;
-	-webkit-transition: background 0.6s ease;
-	-moz-transition: background 0.6s ease;
-	-ms-transition: background 0.6s ease;
-	-o-transition: background 0.6s ease;
-	transition: background 0.6s ease;
+	-webkit-transition: background 0.7s ease;
+	-moz-transition: background 0.7s ease;
+	-ms-transition: background 0.7s ease;
+	-o-transition: background 0.7s ease;
+	transition: background 0.7s ease;
 }
 .onchart-tv-logo.expanded .inner {
-	background-color: rgba(256, 255, 255, 0.8);
+	background-color: rgba(255, 255, 255, 0.8);
+}
+.onchart-tv-logo.expanded.grey .inner {
+	background-color: rgba(224, 222, 222, 0.8);
+}
+.onchart-tv-logo.expanded.blue .inner {
+	background-color: rgba(209, 232, 255, 0.8);
+}
+.onchart-tv-logo.expanded.black .inner {
+	background-color: rgba(0, 0, 0, 0.8);
 }
 .onchart-tv-logo img {
 	width: 33px;
 	height: 23px;
 	display: inline-block;
 	vertical-align: middle;
+	-webkit-transition: display 0.7s ease;
+	-moz-transition: display 0.7s ease;
+	-ms-transition: display 0.7s ease;
+	-o-transition: display 0.7s ease;
+	transition: display 0.7s ease;
 }
 .onchart-tv-logo .text {
 	display: inline-block;
 	width: 0px;
 	overflow: hidden;
-	padding-left: 4px;
+	/*padding-left: 4px;*/
+	padding-left: 36px;
 	vertical-align: middle;
-	-webkit-transition: width 0.3s ease;
-	-moz-transition: width 0.3s ease;
-	-ms-transition: width 0.3s ease;
-	-o-transition: width 0.3s ease;
-	transition: width 0.3s ease;
+	-webkit-transition: width 0.7s ease;
+	-moz-transition: width 0.7s ease;
+	-ms-transition: width 0.7s ease;
+	-o-transition: width 0.7s ease;
+	transition: width 0.7s ease;
 }
 .onchart-tv-logo.expanded .text {
 	width: 145px; /* not 'auto' because of transition */
 }
-.onchart-tv-logo img.faded {display: inline-block;}
-.onchart-tv-logo.expanded img.faded {display: none;}
-.onchart-tv-logo img.solid {display: none;}
-.onchart-tv-logo.expanded img.solid {display: inline-block;}
+.onchart-tv-logo img {
+	display: block;
+	position: absolute;
+	top: 8px;
+	-webkit-transition: opacity 0.7s ease;
+	-moz-transition: opacity 0.7s ease;
+	-ms-transition: opacity 0.7s ease;
+	-o-transition: opacity 0.7s ease;
+	transition: opacity 0.7s ease;
+}
+.onchart-tv-logo img.faded {
+	opacity: 1;
+}
+.onchart-tv-logo.expanded img.faded {
+	opacity: 0;
+}
 
 .onchart-tv-logo .text .logo-highlighted {
 	font-weight: bold;
@@ -219,4 +286,13 @@ html, body {background: none; overflow: hidden; min-width: 240px; height: 100%;}
 	margin: 0;
 	padding: 3px 7px 2px 6px;
 	border: none;
+}
+
+/* Custom Logo */
+.onchart-tv-logo img.custom-image {
+	position: relative;
+	top: 0;
+	left: 0;
+	width: auto;
+	height: auto;
 }

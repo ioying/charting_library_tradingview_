@@ -232,7 +232,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.resolveSymbol = function(symbolName, o
 Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolution, rangeStartDate, rangeEndDate, onDataCallback, onErrorCallback) {
 
 	//	timestamp sample: 1399939200
-	if ((rangeStartDate + "").length > 10) {
+	if (rangeStartDate > 0 && (rangeStartDate + "").length > 10) {
 		throw "Got a JS time instead of Unix one.";
 	}
 
@@ -410,7 +410,7 @@ Datafeeds.SymbolsStorage.prototype._onExchangeDataReceived = function(exchangeNa
 				has_no_volume: tableField(data, "has-no-volume", symbolIndex),
 				listed_exchange: listedExchange,
 				exchange: tradedExchange,
-				minmov: tableField(data, "minmovement", symbolIndex),
+				minmov: tableField(data, "minmovement", symbolIndex) || tableField(data, "minmov", symbolIndex) ,
 				pointvalue: tableField(data, "pointvalue", symbolIndex),
 				pricescale: tableField(data, "pricescale", symbolIndex),
 				type: tableField(data, "type", symbolIndex),

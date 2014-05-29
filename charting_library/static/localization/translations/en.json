@@ -1,0 +1,28 @@
+{
+	"__comment": "Tis is css class name. Use `propertypage-name-label-nocap` if each word should not be capitalized. Or use `propertypage-name-label` if should.",
+	"propertypage-name-label_css_class": "propertypage-name-label",
+
+
+	"__comment": "Tis is css class name.  This item is not actual for now.",
+	"cursors-group-css-class": "thin",
+
+	"day": "day",
+	"day_plural": "days",
+
+	"week": "week",
+	"week_plural": "weeks",
+
+	"month": "month",
+	"month_plural": "months",
+
+	"minute": "minute",
+	"minute_plural": "minutes",
+
+	"hour": "hour",
+	"hour_plural": "hours",
+
+	"Open_in_legend": "O",
+	"High_in_legend": "H",
+	"Low_in_legend": "L",
+	"Close_in_legend": "C"
+}

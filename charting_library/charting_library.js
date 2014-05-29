@@ -7,7 +7,7 @@ if (window.TradingView) {
 var TradingView = {
 
 	version: function() {
-		return 0.6;
+		return "0.7";
 	},
 
 	gEl : function(id) {
@@ -80,7 +80,8 @@ var TradingView = {
 			enabledStudies: options.enabled_studies || [],
 			enabledDrawings: options.enabled_drawings || [],
 			disabledDrawings: options.disabled_drawings || [],
-			savedData: options.savedData || undefined
+			savedData: options.savedData || undefined,
+			locale: options.locale
 		};
 
 		if (options.news && options.news.length){
@@ -151,6 +152,7 @@ TradingView.widget.prototype = {
 			'&enabledStudies='+ encodeURIComponent(JSON.stringify(this.options.enabledStudies)) +
 			'&enabledDrawings='+ encodeURIComponent(JSON.stringify(this.options.enabledDrawings)) +
 			'&disabledDrawings='+ encodeURIComponent(JSON.stringify(this.options.disabledDrawings)) +
+			'&locale='+ encodeURIComponent(this.options.locale) +
 			(this.options.timezone ? '&timezone='+encodeURIComponent(this.options.timezone) : '');
 
 		if (!!this.options.savedData) {
@@ -216,6 +218,10 @@ TradingView.widget.prototype = {
 	remove : function() {
 		var widget = TradingView.gEl(this.id);
 		widget.parentNode.removeChild(widget);
+	},
+
+	onAutoSaveNeeded : function(callback) {
+		this.postMessage.on('onAutoSaveNeeded', callback);
 	},
 
 	save : function(callback) {
