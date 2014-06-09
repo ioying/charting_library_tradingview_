@@ -61,6 +61,7 @@ function createChart() {
 		ChartApiInstance.setEnabledStudiesList(JSON.parse(urlParams.enabledStudies));
 	}
 
+	__defaultsOverrides = JSON.parse(urlParams.overrides);
 
 	var savedContent = !!window.parent.__TVSavedChart
 		? window.parent.__TVSavedChart
@@ -371,6 +372,10 @@ function createChart() {
 
 		ChartApiInstance.on('onAutoSaveNeeded', function(tick) {
 			pm.post(window.parent, 'onAutoSaveNeeded', tick);
+		});
+
+		GlobalEventsStorage.subscribe("onMarkClick", function(markID) {
+			pm.post(window.parent, 'onMarkClick', markID);
 		});
 
 

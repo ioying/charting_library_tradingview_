@@ -563,6 +563,10 @@
 	"sigma_input": "Сигма",
 	"Sigma_input": "Сигма",
 
-	"Crosses": "Пересечение"
+	"Crosses": "Пересечение",
+
+	"Click to set a point": "Кликните, чтобы установить точку",
+	"1. Slide your finger to select location for first anchor<br>2. Tap anywhere to place the first anchor": "1. Определите первую точку, перетаскивая перекрестие пальцем.<br/>2. После этого, сделайте тап в произвольном месте, чтобы установить её.",
+	"1. Slide your finger to select location for next anchor<br>2. Tap anywhere to place the next anchor": "1. Определите точку, перетаскивая перекрестие пальцем.<br/>2. После этого, сделайте тап в произвольном месте, чтобы установить её."
 
 }

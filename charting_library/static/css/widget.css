@@ -18,11 +18,15 @@ html, body {background: none; overflow: hidden; min-width: 240px; height: 100%;}
 
 .insert-study-dialog.minimized
 {
-	width: 480px;
+	width: 490px;
 }
 .insert-study-dialog.minimized .insert-study-tabs
 {
 	display: none;
+}
+.insert-study-dialog.minimized .insert-study-page-content.page-padded
+{
+	padding: 10px 0 0 10px;
 }
 .insert-study-dialog.scrollbar.minimized
 {
@@ -51,7 +55,7 @@ html, body {background: none; overflow: hidden; min-width: 240px; height: 100%;}
 	display: none;
 }
 
-.minimized .insert-study-pages { width: 480px; }
+.minimized .insert-study-pages { width: 490px; }
 .minimized .insert-study-pages .search-header { padding-left: 4px; }
 .minimized .insert-study-items ul.column { width: 150px; }
 .minimized  .search-header{ display: none; }
@@ -239,7 +243,6 @@ html, body {background: none; overflow: hidden; min-width: 240px; height: 100%;}
 
 .tv-embed-buttons-contaner {
 	float:right;
-	padding-top: 3px;
 }
 
 /* cme get image button */

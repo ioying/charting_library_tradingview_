@@ -4155,6 +4155,18 @@ textarea.save-chart-dialog {
   overflow: auto;
   -webkit-overflow-scrolling: touch;
 }
+.custom-scroll-container {
+  position: relative;
+}
+.custom-scroll-container .sb-scrollbar-body {
+  border: 0;
+  background: #d8d8d8;
+  width: 6px;
+}
+.custom-scroll-container .sb-scrollbar-top,
+.custom-scroll-container .sb-scrollbar-bottom {
+  display: none;
+}
 .load-chart .touch {
   visibility: visible;
   opacity: 0.3;
@@ -4668,8 +4680,6 @@ textarea.save-chart-dialog {
   text-overflow: ellipsis;
 }
 .insert-study-tabs {
-  margin: 0;
-  padding: 0;
   width: 189px;
   min-height: 420px;
   float: left;
@@ -4678,28 +4688,7 @@ textarea.save-chart-dialog {
   line-height: 13px;
   border-right: 1px solid #d6d6d6;
 }
-.insert-study-tabs li {
-  padding: 11px 26px 9px;
-  width: 100%;
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
-  float: left;
-  clear: both;
-  color: #595959;
-  cursor: pointer;
-}
-.insert-study-tabs li:hover {
-  background: #f4f7f9;
-}
-.insert-study-tabs li.active:not(.search) {
-  border: 0;
-  padding-left: 22px;
-  font-weight: bold;
-  background: #f4f7f9;
-  border-left: 4px solid #5cb888;
-}
-.insert-study-tabs li.search {
+.insert-study-tabs .search {
   position: relative;
   padding: 0px;
   width: 100%;
@@ -4711,15 +4700,15 @@ textarea.save-chart-dialog {
   border-top: 1px solid #d6d6d6;
   border-bottom: 1px solid #d6d6d6;
 }
-.insert-study-tabs li.search.active {
+.insert-study-tabs .search.active {
   border-top: 1px solid #4c82ce;
   border-bottom: 1px solid #4c82ce;
 }
-.insert-study-tabs li.search.active .left-border,
-.insert-study-tabs li.search.active .right-border {
+.insert-study-tabs .search.active .left-border,
+.insert-study-tabs .search.active .right-border {
   display: block;
 }
-.insert-study-tabs li.search input {
+.insert-study-tabs .search input {
   padding: 9px 9px 9px 29px;
   width: 100%;
   height: 100%;
@@ -4729,7 +4718,7 @@ textarea.save-chart-dialog {
   margin: 0;
   border: none;
 }
-.insert-study-tabs li.search div {
+.insert-study-tabs .search div {
   content: " ";
   display: block;
   position: absolute;
@@ -4739,35 +4728,74 @@ textarea.save-chart-dialog {
   top: 12px;
   left: 12px;
 }
-.insert-study-tabs li.search .left-border,
-.insert-study-tabs li.search .right-border {
+.insert-study-tabs .search .left-border,
+.insert-study-tabs .search .right-border {
   display: none;
   width: 1px;
   height: 36px;
   top: -1px;
   background: #4c82ce;
 }
-.insert-study-tabs li.search .left-border {
+.insert-study-tabs .search .left-border {
   left: 0;
 }
-.insert-study-tabs li.search .right-border {
+.insert-study-tabs .search .right-border {
   left: 100%;
 }
-.insert-study-tabs li.search .input-reset {
+.insert-study-tabs .search .input-reset {
   top: 9px;
   right: 18px;
 }
-.insert-study-tabs li.market-tabs {
+.insert-study-tabs .insert-study-tabs-list-container {
+  position: relative;
+}
+.insert-study-tabs .insert-study-tabs-list-container .sb-scrollbar-body {
+  border: 0;
+  background: #d8d8d8;
+  width: 6px;
+}
+.insert-study-tabs .insert-study-tabs-list-container .sb-scrollbar-top,
+.insert-study-tabs .insert-study-tabs-list-container .sb-scrollbar-bottom {
+  display: none;
+}
+.insert-study-tabs .insert-study-tabs-list-container .insert-study-tabs-list {
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  width: 100%;
+}
+.insert-study-tabs .insert-study-tabs-list-container .insert-study-tabs-list li {
+  padding: 11px 26px 9px;
+  width: 100%;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  float: left;
+  clear: both;
+  color: #595959;
+  cursor: pointer;
+}
+.insert-study-tabs .insert-study-tabs-list-container .insert-study-tabs-list li:hover {
+  background: #f4f7f9;
+}
+.insert-study-tabs .insert-study-tabs-list-container .insert-study-tabs-list li.active:not(.search) {
+  border: 0;
+  padding-left: 22px;
+  font-weight: bold;
+  background: #f4f7f9;
+  border-left: 4px solid #5cb888;
+}
+.insert-study-tabs .insert-study-tabs-list-container .insert-study-tabs-list li.market-tabs {
   padding: 0;
   position: relative;
 }
-.insert-study-tabs li.market-tabs:hover {
+.insert-study-tabs .insert-study-tabs-list-container .insert-study-tabs-list li.market-tabs:hover {
   background: none;
 }
-.insert-study-tabs li.market-tabs .text {
+.insert-study-tabs .insert-study-tabs-list-container .insert-study-tabs-list li.market-tabs .text {
   padding: 11px 26px 9px;
 }
-.insert-study-tabs li.market-tabs .text:before {
+.insert-study-tabs .insert-study-tabs-list-container .insert-study-tabs-list li.market-tabs .text:before {
   content: " ";
   position: absolute;
   display: block;
@@ -4778,28 +4806,28 @@ textarea.save-chart-dialog {
   background: url("../images/select-bg.png");
   background-position: 10px 0;
 }
-.insert-study-tabs li.market-tabs .text.open:before {
+.insert-study-tabs .insert-study-tabs-list-container .insert-study-tabs-list li.market-tabs .text.open:before {
   width: 9px;
   height: 5px;
   top: 14px;
   left: 12px;
   background-position: 0 0;
 }
-.insert-study-tabs li.market-tabs ul {
+.insert-study-tabs .insert-study-tabs-list-container .insert-study-tabs-list li.market-tabs ul {
   width: 100%;
   padding: 0;
 }
-.insert-study-tabs li.market-tabs ul li,
-.insert-study-tabs li.market-tabs ul li:hover,
-.insert-study-tabs li.market-tabs ul li:active {
+.insert-study-tabs .insert-study-tabs-list-container .insert-study-tabs-list li.market-tabs ul li,
+.insert-study-tabs .insert-study-tabs-list-container .insert-study-tabs-list li.market-tabs ul li:hover,
+.insert-study-tabs .insert-study-tabs-list-container .insert-study-tabs-list li.market-tabs ul li:active {
   padding-left: 34px;
 }
-.insert-study-tabs li.market-tabs ul li.active,
-.insert-study-tabs li.market-tabs ul li:hover.active,
-.insert-study-tabs li.market-tabs ul li:active.active {
+.insert-study-tabs .insert-study-tabs-list-container .insert-study-tabs-list li.market-tabs ul li.active,
+.insert-study-tabs .insert-study-tabs-list-container .insert-study-tabs-list li.market-tabs ul li:hover.active,
+.insert-study-tabs .insert-study-tabs-list-container .insert-study-tabs-list li.market-tabs ul li:active.active {
   padding-left: 30px;
 }
-.insert-study-tabs li .beta-sign {
+.insert-study-tabs .insert-study-tabs-list-container .insert-study-tabs-list li .beta-sign {
   color: #5cb888;
   font-size: 10px;
   position: relative;
@@ -13023,6 +13051,9 @@ a.fancy-box-arrow:hover {
   line-height: 20px;
   margin: 0;
 }
+.tv-widget-page h2 a {
+  color: #4B4B4D;
+}
 .tv-widget-page p {
   margin: 3px 0;
 }
@@ -15769,6 +15800,7 @@ addons
 }
 .content-page.features .broad-market-icon-container {
   text-align: center;
+  overflow: hidden;
 }
 .content-page.features .broad-market-icon-container .broad-market-icon {
   height: 104px;
@@ -16364,6 +16396,7 @@ addons
 }
 .content-page.tv-widget-page .intro {
   text-align: center;
+  overflow: hidden;
   padding-bottom: 0px;
 }
 .content-page.tv-widget-page .intro .image {

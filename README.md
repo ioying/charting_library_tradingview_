@@ -1,7 +1,7 @@
 TV Charting Library
 ================
 
-**0.7 stable**
+**0.8 stable**
 
 This repository contains Charting Library package & bugtracker. You may find the documentation [on Google Drive](https://docs.google.com/document/d/1rAigRhQUSLgLCzUAiVBJGAB7uchb-PzFVe0Bl8WTtF0/edit).
 

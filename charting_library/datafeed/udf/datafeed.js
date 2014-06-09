@@ -2,7 +2,7 @@
 	This class implements interaction with UDF-compatible datafeed.
 	Please remember this class is a separate component and may interact to other code through Datafeeds.DatafeedInterface interface functions ONLY
 
-See UDF protocol reference at
+	See UDF protocol reference at
 	https://docs.google.com/document/d/1rAigRhQUSLgLCzUAiVBJGAB7uchb-PzFVe0Bl8WTtF0
 */
 
@@ -131,6 +131,9 @@ Datafeeds.UDFCompatibleDatafeed.prototype._setupWithConfiguration = function(con
 //	===============================================================================================================================
 //	The functions set below is the implementation of JavaScript API.
 
+Datafeeds.UDFCompatibleDatafeed.prototype.getMarks = function (symbolInfo, rangeStart, rangeEnd, onDataCallback) {
+}
+
 
 Datafeeds.UDFCompatibleDatafeed.prototype.searchSymbolsByName = function(ticker, exchange, type, onResultReadyCallback) {
 	var MAX_SEARCH_RESULTS = 30;
@@ -160,6 +163,10 @@ Datafeeds.UDFCompatibleDatafeed.prototype.searchSymbolsByName = function(ticker,
 			})
 	}
 	else {
+
+		if (!this._symbolSearch) {
+			throw "Datafeed error: inconsistent configuration (symbol search)";
+		}
 
 		var searchArgument = {
 			ticker: ticker,
@@ -547,47 +554,49 @@ Datafeeds.PulseUpdater = function(datafeed) {
 
 			that._requestsPending++;
 
-			that._datafeed.getBars(subscriptionRecord.symbolInfo, resolution, datesRangeLeft, datesRangeRight, function(bars) {
-				that._requestsPending--;
+			(function(_subscriptionRecord) {
+					that._datafeed.getBars(_subscriptionRecord.symbolInfo, resolution, datesRangeLeft, datesRangeRight, function(bars) {
+					that._requestsPending--;
 
-				//	means the subscription was cancelled while waiting for data
-				if (!that._subscribers.hasOwnProperty(listenerGUID)) {
-					return;
-				}
-
-				var lastBar = bars[bars.length - 1];
-				if (!isNaN(subscriptionRecord.lastBarTime) && lastBar.time < subscriptionRecord.lastBarTime) {
-					return;
-				}
-
-				var subscribers = subscriptionRecord.listeners;
-				var isNewBar = !isNaN(subscriptionRecord.lastBarTime) && lastBar.time > subscriptionRecord.lastBarTime;
-
-				//	Pulse updating may miss some trades data (ie, if pulse period = 10 secods and new bar is started 5 seconds later after the last update, the
-				//	old bar's last 5 seconds trades will be lost). Thus, at fist we should broadcast old bar updates when it's ready.
-				if (isNewBar) {
-
-					if (bars.length < 2) {
-						throw "Not enough bars in history for proper pulse update. Need at least 2.";
+					//	means the subscription was cancelled while waiting for data
+					if (!that._subscribers.hasOwnProperty(listenerGUID)) {
+						return;
 					}
 
-					var previousBar = bars[bars.length - 2];
+					var lastBar = bars[bars.length - 1];
+					if (!isNaN(_subscriptionRecord.lastBarTime) && lastBar.time < _subscriptionRecord.lastBarTime) {
+						return;
+					}
+
+					var subscribers = _subscriptionRecord.listeners;
+					var isNewBar = !isNaN(_subscriptionRecord.lastBarTime) && lastBar.time > _subscriptionRecord.lastBarTime;
+
+					//	Pulse updating may miss some trades data (ie, if pulse period = 10 secods and new bar is started 5 seconds later after the last update, the
+					//	old bar's last 5 seconds trades will be lost). Thus, at fist we should broadcast old bar updates when it's ready.
+					if (isNewBar) {
+
+						if (bars.length < 2) {
+							throw "Not enough bars in history for proper pulse update. Need at least 2.";
+						}
+
+						var previousBar = bars[bars.length - 2];
+						for (var i =0; i < subscribers.length; ++i) {
+							subscribers[i](previousBar);
+						}
+					}
+
+					_subscriptionRecord.lastBarTime = lastBar.time;
+
 					for (var i =0; i < subscribers.length; ++i) {
-						subscribers[i](previousBar);
+						subscribers[i](lastBar);
 					}
-				}
+				},
 
-				subscriptionRecord.lastBarTime = lastBar.time;
-
-				for (var i =0; i < subscribers.length; ++i) {
-					subscribers[i](lastBar);
-				}
-			},
-
-			//	on error
-			function() {
-				that._requestsPending--;
-			});
+				//	on error
+				function() {
+					that._requestsPending--;
+				});
+			})(subscriptionRecord);
 
 		}
 	},
