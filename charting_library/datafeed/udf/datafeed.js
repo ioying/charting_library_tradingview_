@@ -132,6 +132,19 @@ Datafeeds.UDFCompatibleDatafeed.prototype._setupWithConfiguration = function(con
 //	The functions set below is the implementation of JavaScript API.
 
 Datafeeds.UDFCompatibleDatafeed.prototype.getMarks = function (symbolInfo, rangeStart, rangeEnd, onDataCallback) {
+	if (this._configuration.supports_marks) {
+		var requestURL = this._datafeedURL + "/marks" +
+			"?symbol=" + symbolInfo.ticker.toUpperCase() +
+			"&from=" + rangeStart +
+			"&to=" + rangeEnd;
+
+		$.ajax(requestURL) .done(function (response) {
+				onDataCallback(JSON.parse(response));
+			})
+			.error(function() {
+				onDataCallback([]);
+			})
+	}
 }
 
 
