@@ -6,7 +6,6 @@
 	https://docs.google.com/document/d/1rAigRhQUSLgLCzUAiVBJGAB7uchb-PzFVe0Bl8WTtF0
 */
 
-
 Datafeeds = {};
 
 
@@ -48,7 +47,6 @@ Datafeeds.UDFCompatibleDatafeed.prototype._fireEvent = function(event, argument)
 	}
 }
 
-
 Datafeeds.UDFCompatibleDatafeed.prototype.onInitialized = function() {
 	this._initializationFinished = true;
 	this._fireEvent("initialized");
@@ -63,16 +61,30 @@ Datafeeds.UDFCompatibleDatafeed.prototype._logMessage = function(message) {
 }
 
 
+Datafeeds.UDFCompatibleDatafeed.prototype._send = function(url, params) {
+	var request = url;
+	if (params) {
+		for (var i = 0; i < Object.keys(params).length; ++i) {
+			var key = Object.keys(params)[i];
+			var value = encodeURIComponent(params[key]);
+			request += (i == 0 ? "?" : "&") + key + "=" + value;
+		}
+	}
+
+	this._logMessage("New request: " + request);
+	return $.ajax(request);
+}
+
 Datafeeds.UDFCompatibleDatafeed.prototype._initialize = function() {
 
 	var that = this;
 
-	$.ajax(this._datafeedURL + "/config").
-		done(function(response) {
+	this._send(this._datafeedURL + "/config")
+		.done(function(response) {
 			var configurationData = JSON.parse(response);
 			that._setupWithConfiguration(configurationData);
-		}).
-		error(function(reason) {
+		})
+		.error(function(reason) {
 			that._setupWithConfiguration({
 				supports_search: false,
 				supports_group_request: true
@@ -133,12 +145,12 @@ Datafeeds.UDFCompatibleDatafeed.prototype._setupWithConfiguration = function(con
 
 Datafeeds.UDFCompatibleDatafeed.prototype.getMarks = function (symbolInfo, rangeStart, rangeEnd, onDataCallback) {
 	if (this._configuration.supports_marks) {
-		var requestURL = this._datafeedURL + "/marks" +
-			"?symbol=" + symbolInfo.ticker.toUpperCase() +
-			"&from=" + rangeStart +
-			"&to=" + rangeEnd;
-
-		$.ajax(requestURL) .done(function (response) {
+		this._send(this._datafeedURL + "/marks", {
+				symbol: symbolInfo.ticker.toUpperCase(),
+				from : rangeStart,
+				to: rangeEnd
+			})
+			.done(function (response) {
 				onDataCallback(JSON.parse(response));
 			})
 			.error(function() {
@@ -153,7 +165,12 @@ Datafeeds.UDFCompatibleDatafeed.prototype.searchSymbolsByName = function(ticker,
 
 	if (this._configuration.supports_search) {
 
-		$.ajax(this._datafeedURL + "/search?limit=" + MAX_SEARCH_RESULTS  +"&query=" + ticker + "&type=" + type + "&exchange=" + exchange)
+		this._send(this._datafeedURL + "/search", {
+				limit: MAX_SEARCH_RESULTS,
+				query: ticker.toUpperCase(),
+				type: type,
+				exchange: exchange
+			})
 			.done(function (response) {
 				var data = JSON.parse(response);
 
@@ -217,10 +234,9 @@ Datafeeds.UDFCompatibleDatafeed.prototype.resolveSymbol = function(symbolName, o
 	}
 
 	if (!this._configuration.supports_group_request) {
-		var requestURL = this._datafeedURL + "/symbols?symbol=" + encodeURIComponent(symbolName.toUpperCase());
-		this._logMessage(requestURL);
-
-		$.ajax(requestURL)
+		this._send(this._datafeedURL + "/symbols", {
+				symbol: symbolName.toUpperCase()
+			})
 			.done(function (response) {
 				var data = JSON.parse(response);
 
@@ -256,15 +272,12 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolut
 		throw "Got a JS time instead of Unix one.";
 	}
 
-	var requestURL = this._datafeedURL + "/history" +
-		"?symbol=" + symbolInfo.ticker.toUpperCase() +
-		"&resolution=" + resolution +
-		"&from=" + rangeStartDate +
-		"&to=" + rangeEndDate;
-
-	this._logMessage("Requesting data from " + requestURL);
-
-	$.ajax(requestURL)
+	this._send(this._datafeedURL + "/history", {
+			symbol: symbolInfo.ticker.toUpperCase(),
+			resolution: resolution,
+			from: rangeStartDate,
+			to: rangeEndDate
+	})
 	.done(function (response) {
 
 		var data = JSON.parse(response);
@@ -376,17 +389,16 @@ Datafeeds.SymbolsStorage.prototype._requestFullSymbolsList = function() {
 
 		this._exchangesWaitingForData[exchange] = "waiting_for_data";
 
-		var requestURL = datafeed._datafeedURL + "/symbol_info?group=" + exchange;
-		this._datafeed._logMessage("requesting exnchage info from " + requestURL);
-
-		$.ajax(requestURL).
-			done(function(exchange) {
+		this._datafeed._send(this._datafeedURL + "/symbol_info", {
+				group: exchange
+			})
+			.done(function(exchange) {
 				return function(response) {
 					that._onExchangeDataReceived(exchange, JSON.parse(response));
 					that._onAnyExchangeResponseReceived(exchange);
 				}
-			}(exchange)).
-			error(function(exchange) {
+			}(exchange))
+			.error(function(exchange) {
 				return function (reason) {
 					that._onAnyExchangeResponseReceived(exchange);
 				};
