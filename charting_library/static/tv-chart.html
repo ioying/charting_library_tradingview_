@@ -299,7 +299,7 @@ function createChart() {
 		});
 
 		pm.on('createShape', function(data) {
-			var barIndex = chartWidget.model().timeScale().timePointToIndex(data.point.time)
+			var barIndex = chartWidget.model().timeScale().timePointToIndex(data.point.time);
 			var point = { index: barIndex };
 
 			if (!!data.point.price) {
@@ -350,6 +350,21 @@ function createChart() {
 			pm.post(window.parent, 'onIconCreated', "<icon_uid_here>");
 		});
 
+        pm.on('createVerticalLine', function(data) {
+            var barIndex = chartWidget.model().timeScale().timePointToIndex(data.point.time);
+            var point = { index: barIndex, price: 0 };
+
+            var pane = chartWidget._paneWidgets[0]._state;
+            var tool = chartWidget.model().createLineTool(pane, point, 'LineToolVertLine');
+
+            if (!!data.options.lock && data.options.lock) {
+                tool.setUserEditEnabled(false);
+            }
+
+            //	TODO: assign onClick handler here
+
+            pm.post(window.parent, 'onVerticalLineCreated', "<line_uid_here>");
+        });
 
 		chartWidget.model().mainSeries().onSymbolResolved().subscribe(null, function() {
 			var symbolInfo = chartWidget.model().mainSeries().symbolInfo(),
