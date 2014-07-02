@@ -89,8 +89,9 @@ function createChart() {
 			handleSessionErrors: true,
 			muteSessionErrors: true,
 			timezone: urlParams.timezone,
-			defSymbol: urlParams.symbol || 'MSF',
-			defInterval: urlParams.interval || 'D'
+			defSymbol: urlParams.symbol || 'MSFT',
+			defInterval: urlParams.interval || 'D',
+			hideSymbolSearch: urlParams.hideSymbolSearch
 		}
 	});
 
@@ -102,6 +103,7 @@ function createChart() {
 		chartWidgetCollection: chartWidgetCollection,
 		headerChartPanel: headerChartPanel,
 		hideStudyTemplates: true,
+		hideSymbolSearch: urlParams.hideSymbolSearch
 	});
 
 	TradingView.Linking.bindToChartWidgetCollection(chartWidgetCollection);
