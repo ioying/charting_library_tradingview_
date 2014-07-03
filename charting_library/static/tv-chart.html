@@ -367,36 +367,39 @@ function createChart() {
 
             pm.post(window.parent, 'onVerticalLineCreated', "<line_uid_here>");
         });
-
-		chartWidget.model().mainSeries().onSymbolResolved().subscribe(null, function() {
-			var symbolInfo = chartWidget.model().mainSeries().symbolInfo(),
-			interval = chartWidget.model().mainSeries().properties().interval.value(),
-			result = {
-				name: symbolInfo.name,
-				exchange: symbolInfo.exchange,
-				description: symbolInfo.description,
-				type: symbolInfo.type,
-				interval: interval
-			};
-
-			pm.post(window.parent, 'onSymbolChange', result);
-		});
-
-
-		ChartApiInstance.on('realtime_tick', function(tick) {
-			pm.post(window.parent, 'onTick', tick);
-		});
-
-		ChartApiInstance.on('onAutoSaveNeeded', function(tick) {
-			pm.post(window.parent, 'onAutoSaveNeeded', tick);
-		});
-
-		GlobalEventsStorage.subscribe("onMarkClick", function(markID) {
-			pm.post(window.parent, 'onMarkClick', markID);
-		});
-
-
 	})();
+
+
+	chartWidget.model().mainSeries().onSymbolResolved().subscribe(null, function() {
+		var symbolInfo = chartWidget.model().mainSeries().symbolInfo(),
+		interval = chartWidget.model().mainSeries().properties().interval.value(),
+		result = {
+			name: symbolInfo.name,
+			exchange: symbolInfo.exchange,
+			description: symbolInfo.description,
+			type: symbolInfo.type,
+			interval: interval
+		};
+
+		pm.post(window.parent, 'onSymbolChange', result);
+	});
+
+	TradingView.Linking.interval.subscribe(function(interval){
+		pm.post(window.parent, 'onIntervalChange', interval)
+	});
+
+	ChartApiInstance.on('realtime_tick', function(tick) {
+		pm.post(window.parent, 'onTick', tick);
+	});
+
+	ChartApiInstance.on('onAutoSaveNeeded', function(tick) {
+		pm.post(window.parent, 'onAutoSaveNeeded', tick);
+	});
+
+	GlobalEventsStorage.subscribe("onMarkClick", function(markID) {
+		pm.post(window.parent, 'onMarkClick', markID);
+	});
+
 };
 
 
