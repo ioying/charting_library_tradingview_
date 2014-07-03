@@ -55,7 +55,7 @@ html, body {background: none; overflow: hidden; min-width: 240px; height: 100%;}
 	display: none;
 }
 
-.minimized .insert-study-pages { width: 490px; }
+.minimized .insert-study-main { width: 490px; }
 .minimized .insert-study-pages .search-header { padding-left: 4px; }
 .minimized .insert-study-items ul.column { width: 150px; }
 .minimized  .search-header{ display: none; }
