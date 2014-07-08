@@ -475,7 +475,7 @@ body.fullscreen-mode {
   border: 1px solid #aaadb1;
   background: #fff;
   z-index: 120;
-  margin: 2px 0;
+  margin: 0;
 }
 .charts-popup-list .icon-white-arrow-up {
   position: absolute;
@@ -3115,7 +3115,9 @@ a:active .icon-toolbar-reset {
   text-decoration: none !important;
   color: #6f7073 !important;
   border: 1px solid #c9cbcd;
-  font: bold 12px Calibri, Arial;
+  font-size: 11px;
+  font-family: arial, sans-serif;
+  font-weight: bold;
   text-align: center;
   background: url('../images/button-bg.png') 0 0 repeat-x;
   -webkit-user-select: none;
@@ -11254,8 +11256,8 @@ body.viewchart-body .tv-layout-width .tv-index-footer-wrap {
   /*display: inline-block;*/
   margin: 15px 35px 15px 0;
   /*min-width: 200px;
-	max-width: 350px;*/
-  width: 350px;
+	max-width: 350px;
+	width: 350px;*/
 }
 .related-chart .avatar {
   position: relative;
@@ -14934,6 +14936,11 @@ ul.feature-list li .feature-description.feature-extended-hours .feature-icon {
 }
 .disabled .order-checkbox {
   background: #f2f2f2;
+  border-color: #c3c8cf;
+  cursor: default;
+}
+.disabled .order-checkbox.check::after {
+  background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTEiIGhlaWdodD0iMTEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0iI2MzYzhjZiI+PHBhdGggZD0iTTMuMTIyIDcuNjgybDUuNzUxLTUuNjk3IDEuNTEzIDEuNDk4LTUuNzUxIDUuNjk3eiIvPjxwYXRoIGQ9Ik0yLjMzNiA0LjE1NGwzLjY4MiAzLjY0Ny0xLjUxMyAxLjQ5OC0zLjY4Mi0zLjY0N3oiLz48L2c+PC9zdmc+');
 }
 .order-details {
   float: right;
@@ -14981,6 +14988,11 @@ ul.feature-list li .feature-description.feature-extended-hours .feature-icon {
 .order-details .order-details-table tr.disabled .product-price {
   color: #bdbdbd;
 }
+.order-details .exchange-subtotal {
+  display: none;
+  text-align: right;
+  margin: 18px 12px 0;
+}
 .order-details .order-details-totals {
   float: right;
   border-spacing: 1px;
@@ -15004,7 +15016,7 @@ ul.feature-list li .feature-description.feature-extended-hours .feature-icon {
 .order-details .order-details-totals .cost:before {
   content: "$";
 }
-.order-details .order-details-totals .cost:after {
+.order-details .order-details-totals .cost.per-month:after {
   content: "/m";
 }
 .order-details .order-details-totals .cost:after {
@@ -15014,6 +15026,7 @@ ul.feature-list li .feature-description.feature-extended-hours .feature-icon {
   color: #ea4b36;
   text-decoration: line-through;
   float: left;
+  display: none;
 }
 .order-details .order-details-totals .discount:before {
   content: "$";
@@ -15026,7 +15039,7 @@ ul.feature-list li .feature-description.feature-extended-hours .feature-icon {
 .order-details .product-price:before {
   content: "$";
 }
-.order-details .product-price:after {
+.order-details .product-price.per-month:after {
   content: "/m";
 }
 .payment-method-dialog .tv-dialog-title-text::before {
@@ -15130,6 +15143,10 @@ ul.feature-list li .feature-description.feature-extended-hours .feature-icon {
 }
 .order-purchase-button a:focus {
   border: 1px solid #4c82ce;
+}
+.order-purchase-button a.disabled {
+  cursor: default;
+  background-color: #c3c8cf;
 }
 .chart-relation-buttons {
   position: absolute;

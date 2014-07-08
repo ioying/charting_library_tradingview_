@@ -159,8 +159,8 @@ function createChart() {
 						'</a>'+
 					'</div>'+
 				'</div>')
-				.on('mouseenter', function() { $(this).addClass('expanded')    })
-				.on('mouseleave', function() { $(this).removeClass('expanded') })
+				// .on('mouseenter', function() { $(this).addClass('expanded')    })
+				// .on('mouseleave', function() { $(this).removeClass('expanded') })
 				.appendTo('.chart-widget');
 			;
 
@@ -170,12 +170,12 @@ function createChart() {
 					setTimeout(function() {
 						$('.onchart-tv-logo').addClass('expanded');
 					}, 0.5 * 1000);
-					setTimeout(function() {
-						var $logo = $('.onchart-tv-logo');
-						if ($logo.is(':not(:hover)')) {
-							$logo.removeClass('expanded');
-						}
-					}, 20 * 1000);
+					// setTimeout(function() {
+					// 	var $logo = $('.onchart-tv-logo');
+					// 	if ($logo.is(':not(:hover)')) {
+					// 		$logo.removeClass('expanded');
+					// 	}
+					// }, 20 * 1000);
 				}
 			}
 
@@ -202,6 +202,7 @@ function createChart() {
 		enabledDrawings: urlParams.enabledDrawings ? JSON.parse(urlParams.enabledDrawings ) : [],
 		disabledDrawings: urlParams.disabledDrawings ? JSON.parse(urlParams.disabledDrawings ) : []
 	});
+	window.sideToolbar = sidetoolbar;
 
 	window.lineToolPropertiesToolbar = new TradingView.LineToolPropertiesWidget(chartWidgetCollection);
 	$('.tv-main-panel').css('margin-left', sidetoolbar.element().width() + 'px');

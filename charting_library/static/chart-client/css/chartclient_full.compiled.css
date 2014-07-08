@@ -977,6 +977,9 @@ a.add-custom-script-btn {
 .tv-script-header .tv-button.tv-script-actions .icon-dropdown {
   left: 0;
 }
+.tv-script-header .tv-button.tv-script-actions.with-arrow {
+  border-left-width: 0 !important;
+}
 .tv-script-header .tv-button.tv-script-add-button {
   margin-left: 5px;
 }
@@ -1660,10 +1663,10 @@ a.add-custom-script-btn {
   top: 1px;
 }
 .ch-smiles-popup {
-  width: 170px;
+  width: 170px !important;
   height: 110px;
-  background-color: #fff;
-  border: #007FB9 1px solid;
+  background-color: #fff !important;
+  border: #007FB9 1px solid !important;
 }
 .ch-smiles-popup .blue-tooltip-text {
   cursor: pointer;
@@ -2454,7 +2457,7 @@ body.chat-page {
 }
 .msg-data .msg-item .desc {
   color: #8f8f8f;
-  margin-top: 3px;
+  margin-top: 1px;
   font-size: 11px;
 }
 .msg-data .msg-item .counter {
@@ -3101,7 +3104,7 @@ body.chat-page {
   overflow: hidden;
   text-overflow: ellipsis;
   color: #8f8f8f;
-  margin-top: 4px;
+  margin-top: 1px;
   font-size: 11px;
 }
 .pc-data .pc-item .title {
@@ -3624,9 +3627,9 @@ body.chat-page {
   border: 1px solid #c9cbcd;
   height: 14px;
   background: #FFFFFF;
-  color: #8b8c8e;
+  color: #555;
   font-size: 11px;
-  font-weight: bold;
+  font-weight: 600;
   float: left;
   display: block;
   position: relative;
@@ -3697,6 +3700,18 @@ body.chat-page {
   background: #cbcdcf;
   top: -8px;
   right: 24px;
+}
+.header-chart-panel .left:not(.captions) .toggle-caption span.caption {
+  display: none;
+}
+.header-chart-panel .left.captions .toggle-caption {
+  padding: 7px 10px;
+}
+.header-chart-panel .left.captions .toggle-caption.active {
+  color: #4AB2DC;
+}
+.header-chart-panel .left.captions .toggle-caption i {
+  display: none;
 }
 .header-chart-panel .button .arrow-icon,
 .hotlist-controls .arrow-icon,
@@ -4335,7 +4350,7 @@ div.symbol-edit-popup .exchange-filter .sbToggle,
 .header-chart-panel .button:hover,
 .symbol-edit-widget .button:hover {
   background: #fff;
-  color: #68696b;
+  color: #333;
 }
 .header-chart-panel .button:active,
 .header-chart-panel .button.active,
@@ -4350,7 +4365,7 @@ div.symbol-edit-popup .exchange-filter .sbToggle,
 .ch-controls .button.active,
 .ch-controls .button:active {
   background: #f2f5f8 !important;
-  color: #68696b;
+  color: #333;
 }
 .header-chart-panel .icon-container-toggle {
   width: 70px;
@@ -4612,6 +4627,18 @@ div.symbol-edit-popup .exchange-filter .sbToggle,
 }
 .favored-list.study-template-popup .item .title-expanded {
   width: 190px;
+}
+.header-chart-panel .button.objects-tree {
+  padding: 6px 7px 8px 6px !important;
+}
+.header-chart-panel .button.objects-tree i {
+  width: 18px;
+  height: 16px;
+  background-position: 1px -461px;
+}
+.header-chart-panel .button.objects-tree:active i,
+.header-chart-panel .button.objects-tree.active i {
+  background-position: -19px -461px;
 }
 .favored-list-container.study-template-widget {
   float: left;
@@ -5343,6 +5370,32 @@ a.getimage .icon {
   top: 3px;
   left: 7px;
 }
+.tv-side-toolbar.hidden {
+  display: none;
+}
+.tv-side-toolbar.two-column {
+  width: 97px;
+}
+.tv-side-toolbar.two-column .tools-group {
+  margin-right: 0;
+}
+.tv-side-toolbar.two-column .tools-group:not(:first-child):not(.no-delimiter):before {
+  width: 87px;
+}
+.tv-side-toolbar.two-column .tools-group:first-child {
+  margin-bottom: -5px;
+}
+.tv-side-toolbar.two-column .tools-group .button {
+  display: inline-block;
+  width: 39px;
+  margin-right: 5px;
+}
+.tv-side-toolbar.two-column .help-button-container {
+  width: 95px;
+}
+.tv-side-toolbar.two-column .help-button-container .help-button {
+  margin: auto;
+}
 .charts-popup-list.main-menu-popup {
   margin-top: 0px;
 }
@@ -5429,6 +5482,9 @@ a.getimage .icon {
   height: 30px;
   margin: 6px 0 0 0;
   position: relative;
+}
+.tv-side-toolbar .tools-group .button.hidden {
+  display: none;
 }
 .tv-side-toolbar .help-button-container {
   position: absolute;
@@ -7314,6 +7370,7 @@ div.insert-study-dialog p {
   pointer-events: auto;
 }
 .pane-legend-line button.follow-symbol {
+  display: none;
   pointer-events: auto;
   margin-right: 4px;
   opacity: 0.3;
@@ -8235,53 +8292,88 @@ div.tooltip {
   z-index: 5;
   white-space: nowrap;
 }
-.chart-status-picture .series-status {
+.series-status-text .status,
+.series-status-text {
   display: inline-block;
-  height: 15px;
-  background: url('../../chart-client/css/images/chartstatus.png') 0 0 no-repeat;
+  height: 13px;
   vertical-align: top;
+  font-size: 11px;
+  font-weight: normal;
+  pointer-events: none !important;
 }
-.chart-status-picture .series-status.chart-status-picture-realtime {
-  width: 56px;
-  background-position: 0 -30px;
+/*	TODO: draw a rectangle & use border-radius to work around browsers having fonts antialiasing switched off */
+.series-status-text .dot {
+  width: 8px;
+  height: 8px;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+  border-radius: 4px;
+  display: inline-block;
 }
-.chart-status-picture.pre-market .series-status {
-  width: 69px;
-  background-position: 0 -90px;
+/*	BEWARE: these classes CSS priorities do not matter. */
+.series-status-text.eod {
+  color: #A953AE;
 }
-.chart-status-picture.post-market .series-status {
-  width: 73px;
-  background-position: 0 -105px;
+.series-status-text.eod .dot {
+  background-color: #A953AE;
 }
-.chart-status-picture.out-of-session .series-status {
-  width: 48px;
-  background-position: 0 -120px;
+.series-status-text.connecting {
+  color: #48ABC0;
 }
-.chart-status-picture .series-status.chart-status-picture-connecting {
-  width: 57px;
-  background-position: 0 0;
+.series-status-text.connecting .dot {
+  background-color: #48ABC0;
 }
-.chart-status-picture .series-status.chart-status-picture-loading {
-  width: 73px;
-  background-position: 0 -15px;
+.series-status-text.loading {
+  color: #256ED0;
 }
-.chart-status-picture .series-status.chart-status-picture-eod {
-  width: 56px;
-  background-position: 0 -45px;
+.series-status-text.loading .dot {
+  background-color: #256ED0;
 }
-.chart-status-picture .series-status.chart-status-picture-delayed {
-  width: 70px;
-  background-position: 0 -60px;
+.series-status-text.delayed {
+  color: #A953AE;
 }
-.chart-status-picture .series-status.chart-status-picture-delayed-streaming {
-  width: 53px;
-  background-position: 0 -135px;
+.series-status-text.delayed .dot {
+  background-color: #A953AE;
 }
-.chart-status-picture .series-status.chart-status-picture-invalid {
-  width: 84px;
-  background-position: 0 -75px;
+.series-status-text.delayed-streaming {
+  color: #FF9247;
 }
-.chart-status-picture .series-status.chart-status-picture-snapshot {
+.series-status-text.delayed-streaming .dot {
+  background-color: #FF9247;
+}
+.series-status-text.invalid {
+  color: #BD3820;
+}
+.series-status-text.invalid .dot {
+  background-color: #BD3820;
+}
+.series-status-text.pre-market {
+  color: #FEB300;
+}
+.series-status-text.pre-market .dot {
+  background-color: #FEB300;
+}
+.series-status-text.post-market {
+  color: #0073D2;
+}
+.series-status-text.post-market .dot {
+  background-color: #0073D2;
+}
+.series-status-text.out-of-session {
+  color: #939393;
+}
+.series-status-text.out-of-session .dot {
+  background-color: #939393;
+}
+.series-status-text.market,
+.series-status-text.realtime {
+  color: #318757;
+}
+.series-status-text.market .dot,
+.series-status-text.realtime .dot {
+  background-color: #318757;
+}
+.series-status-text.snapshot {
   display: none;
 }
 .chart-status-picture .bats-warning {
@@ -8290,6 +8382,7 @@ div.tooltip {
   background: url('../../images/warning-icon.png') 0 0 no-repeat;
   cursor: pointer;
   margin-right: 3px;
+  margin-top: -1px;
   display: none;
 }
 .chart-status-picture .bats-warning.warn-bats {
