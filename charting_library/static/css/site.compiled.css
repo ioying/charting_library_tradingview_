@@ -3167,6 +3167,9 @@ a:active .icon-toolbar-reset {
   padding: 3px 8px;
   font-weight: normal;
 }
+.chart-description .tv-button.slim {
+  line-height: normal;
+}
 .tv-button.icon {
   padding: 5px;
 }
@@ -6511,10 +6514,9 @@ div.critical-error {
   position: absolute;
   right: 15px;
   top: 6px;
-  display: none;
 }
 .tv-dialog-content .tv-dialog-tree-item:hover {
-  background: #F1F3F6;
+  background: #F7F9FB;
 }
 .tv-dialog-content .tv-dialog-tree-item:hover .tree-icon-container {
   display: inline-block;
@@ -6531,6 +6533,12 @@ div.critical-error {
 .tv-dialog-content .tv-dialog-tree-item .button.icon-hide .icon {
   background-position: -14px -28px;
 }
+.tv-dialog-content .tv-dialog-tree-item.locked .button.icon-lock .icon {
+  background-position: -71px -14px;
+}
+.tv-dialog-content .tv-dialog-tree-item .button.icon-lock .icon {
+  background-position: -71px -28px;
+}
 .tv-dialog-content .tv-dialog-tree-item.active {
   background: #F1F3F6;
 }
@@ -6544,7 +6552,7 @@ div.critical-error {
   display: none;
 }
 .tv-dialog-content .tv-dialog-tree-item:first-child .button.up {
-  display: none;
+  visibility: hidden;
 }
 .tv-dialog-content .tv-dialog-tree-item.objects .name-column {
   width: 80%;
@@ -6583,21 +6591,31 @@ div.critical-error {
   opacity: 0.6;
 }
 .tv-dialog-content .tv-dialog-tree-item .button {
+  display: inline-block;
   width: 22px;
   height: 22px;
-  display: inline-block;
   margin: 0 0 0 3px;
   cursor: pointer;
-  border: 1px solid #c9cbcd;
-  padding: 0 0 0 3px;
-  background: #fff;
+  padding: 1px 0 0 4px;
+  opacity: .5;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
-.tv-dialog-content .tv-dialog-tree-item .button.active,
-.tv-dialog-content .tv-dialog-tree-item .button:active {
-  background: #f2f5f8 !important;
+.tv-dialog-content .tv-dialog-tree-item .button:hover {
+  opacity: 1;
+}
+.tv-dialog-content .tv-dialog-tree-item .button:hover:before {
+  display: none !important;
+}
+.tv-dialog-content .tv-dialog-tree-item .button.hidden {
+  visibility: hidden;
+}
+.tv-dialog-content .tv-dialog-tree-item.active .button {
+  opacity: .7;
+}
+.tv-dialog-content .tv-dialog-tree-item.active .button:hover {
+  opacity: 1;
 }
 .tv-dialog-content .tv-dialog-tree-item .icon {
   background: url('../images/dialogs/objects-tree.png');
@@ -14857,7 +14875,7 @@ ul.feature-list li .feature-description.feature-extended-hours .feature-icon {
   left: 42px;
 }
 .order-heading .order-heading-product-name {
-  font-size: 38px;
+  font-size: 34px;
   position: absolute;
   top: 50px;
   left: 420px;
@@ -16642,6 +16660,12 @@ button.follow-symbol.flat.active {
 .content-page .vindent {
   padding: 36px 0 36px;
 }
+.content-page .vindent-top {
+  padding-top: 36px;
+}
+.content-page .vindent-bottom {
+  padding-bottom: 36px;
+}
 .content-page .hvindent {
   padding: 36px 10px;
 }
@@ -16699,6 +16723,15 @@ button.follow-symbol.flat.active {
 }
 .content-page .tv-content-button.yellow:active {
   background-color: #e8ca71;
+}
+.content-page .tv-content-button.black {
+  background-color: #26282f;
+}
+.content-page .tv-content-button.black:hover {
+  background-color: #2b2d35;
+}
+.content-page .tv-content-button.black:active {
+  background-color: #2f323a;
 }
 .content-page.how-it-works {
   overflow: hidden;
@@ -17672,7 +17705,7 @@ addons
 .content-page.tv-widget-page .browser-container {
   margin-top: 50px;
 }
-.license-dialog {
+.charting-library-page-dialog {
   text-align: left;
   line-height: 1.7;
   font-size: 15px;

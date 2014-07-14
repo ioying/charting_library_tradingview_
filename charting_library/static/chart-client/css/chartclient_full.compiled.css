@@ -5091,13 +5091,13 @@ a.getimage .icon {
   /*background: #F9F9F9;*/
   background: #FFFFFF;
   text-align: center;
-  color: #8B8C8E;
+  color: #555;
   font-size: 11px;
-  font-weight: bold;
+  font-weight: 600;
   cursor: default;
 }
 .save-load-buttons > span:hover {
-  color: #68696b;
+  color: #333;
 }
 .save-load-buttons > span:active,
 .save-load-buttons > span.active {
@@ -6696,6 +6696,9 @@ html.feature-touch .widgetbar-widgethandle {
 .properties-toolbar [class*="icon-"].icon-line-right-extend {
   background-position: 0 -600px;
 }
+.properties-toolbar [class*="icon-"].icon-lock {
+  background-position: 0 -625px;
+}
 .properties-toolbar [class*="icon-"].active.icon-pencil,
 .properties-toolbar [class*="icon-"]:active.icon-pencil,
 .properties-toolbar [class*="icon-"]:focus.icon-pencil {
@@ -6826,6 +6829,11 @@ html.feature-touch .widgetbar-widgethandle {
 .properties-toolbar [class*="icon-"]:focus.icon-line-right-extend {
   background-position: -40px -600px;
 }
+.properties-toolbar [class*="icon-"].active.icon-lock,
+.properties-toolbar [class*="icon-"]:active.icon-lock,
+.properties-toolbar [class*="icon-"]:focus.icon-lock {
+  background-position: -40px -625px;
+}
 .properties-toolbar .active [class*="icon-"].icon-pencil,
 .properties-toolbar .selected [class*="icon-"].icon-pencil {
   background-position: -40px 0px;
@@ -6929,6 +6937,10 @@ html.feature-touch .widgetbar-widgethandle {
 .properties-toolbar .active [class*="icon-"].icon-line-right-extend,
 .properties-toolbar .selected [class*="icon-"].icon-line-right-extend {
   background-position: -40px -600px;
+}
+.properties-toolbar .active [class*="icon-"].icon-lock,
+.properties-toolbar .selected [class*="icon-"].icon-lock {
+  background-position: -40px -625px;
 }
 .mini-widget {
   overflow: hidden;
@@ -8976,12 +8988,12 @@ span.back-to-present.hidden {
 #footer-chart-panel .save-load-buttons .button:hover:not(.last) {
   margin-right: -1px;
 }
-#footer-chart-panel .save-load-buttons .button.save.titled:not(.no-change):hover {
+#footer-chart-panel .save-load-buttons .button.save.titled:hover {
   overflow: visible;
   border-right: none;
   margin-right: 0;
 }
-#footer-chart-panel .save-load-buttons .button.save.titled:not(.no-change):hover .separator {
+#footer-chart-panel .save-load-buttons .button.save.titled:hover .separator {
   margin-top: -1px;
   border-top: #c9cbcd 1px solid;
   border-bottom: #c9cbcd 1px solid;

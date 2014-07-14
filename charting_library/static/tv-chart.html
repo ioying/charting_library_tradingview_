@@ -184,7 +184,9 @@ function createChart() {
 
 	}
 
-	chartWidget.withModel(null, createLogo);
+	if (urlParams.disableLogo == "false") {
+		chartWidget.withModel(null, createLogo);
+	}
 
 	TradingView.tokenInitialized.resolve();
 
