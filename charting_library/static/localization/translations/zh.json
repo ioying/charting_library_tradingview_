@@ -366,9 +366,10 @@
     "hour_plural_1": "小时",
     "hour_plural_2": "hour_plural_2",
     "hour_plural_5": "hour_plural_5",
-    "D_dates": "D",
-    "W_dates": "W",
-    "M_dates": "M",
+    "D_dates": "日",
+    "d_dates": "日",
+    "W_dates": "周",
+    "M_dates": "月",
     "h_dates": "小时",
     "in_dates": "in",
     "Jan": "一月",
@@ -542,5 +543,13 @@
     "SuperCycle": "SuperCycle",
     "GrandSuperCycle": "GrandSuperCycle",
     "Lock": "Lock",
-    "Width": "Width"
+    "Width": "Width",
+    "Line With Breaks": "Line With Breaks",
+    "Area With Breaks": "Area With Breaks",
+    "Type": "Type",
+    "Simple": "Simple",
+    "With Markers": "With Markers",
+    "Step": "Step",
+    "No drawings yet": "No drawings yet",
+    "Lock/Unlock": "Lock/Unlock"
 }
