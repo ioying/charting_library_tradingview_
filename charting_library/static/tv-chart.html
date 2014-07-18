@@ -39,6 +39,17 @@
 
 <script type="text/javascript">
 
+pm = TradingView.postMessageWrapper(window.parent);
+pm.__delayedMesssages = [];
+
+pm.on('widgetReady', function(data, cb) {
+	pm.__delayedMesssages.push({
+		data: data,
+		cb: cb
+	});
+});
+
+
 function createChart() {
 
 	if (!Modernizr.canvas || !Modernizr.canvastext) {
@@ -235,7 +246,6 @@ function createChart() {
 
 	ChartSaverInstance = new ChartSaver(chartWidgetCollection);
 
-	pm = TradingView.postMessageWrapper(window.parent);
 
 	(function() {
 
@@ -258,7 +268,7 @@ function createChart() {
 		});
 
 
-		pm.on('widgetReady', function(data, cb) {
+		function onChartReadySubscriptionCalled(data, cb) {
 			chartWidget.withModel(null, function () {
 				if (chartWidget.model().mainSeries().bars().size() > 0) {
 					cb();
@@ -270,7 +280,17 @@ function createChart() {
 					chartWidget.model().mainSeries().onBarReceived().subscribe(null, eventHandler);
 				}
 			});
+
+		}
+
+		pm.on('widgetReady', function(data, cb) {
+			onChartReadySubscriptionCalled(data, cb);
 		});
+
+		for (var i=0; i < pm.__delayedMesssages.length; ++i) {
+			onChartReadySubscriptionCalled(pm.__delayedMesssages[i].data, pm.__delayedMesssages[i].cb);
+		}
+
 
 		pm.on('createStudy', function(options) {
 			var metainfo = StudyMetaInfo.findStudyMetaInfoByDescription(chartWidget.model().studiesMetaData(), options.name);
