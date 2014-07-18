@@ -12,7 +12,7 @@
     "Add Symbol": "シンボルの追加",
     "Scales Properties...": "スケールプロパティ",
     "Add": "追加",
-    "Company Comparison": "会社比較",
+    "Company Comparison": "銘柄比較",
     "Indicators, Fundamentals, Economy and Add-ons": "インディケータ、ファンダメンタル、経済指標、アドオン",
     "Economy & Symbols": "指標 & シンボル",
     "Bars": "バー",
@@ -67,7 +67,7 @@
     "Hide": "隠す",
     "Insert Drawing Tool": "描画ツールを挿入する",
     "Insert Indicator...": "インディケータを挿入 ...",
-    "Last Value on Price Scale": "価格スケールの最新値",
+    "Last Value on Price Scale": "価格スケール上の最新値",
     "Link To": "リンク",
     "Load New Bars": "新しいバーの読み込み",
     "Lock All Drawing Tools": "すべての描画ツールをロックする",
@@ -550,6 +550,6 @@
     "Simple": "シンプル",
     "With Markers": "マーカー",
     "Step": "ステップ",
-    "No drawings yet": "No drawings yet",
-    "Lock/Unlock": "Lock/Unlock"
+    "No drawings yet": "未描画",
+    "Lock/Unlock": "ロック/解除"
 }

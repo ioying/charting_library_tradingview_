@@ -11842,6 +11842,24 @@ body.viewchart-body .tv-layout-width .tv-index-footer-wrap {
   position: relative;
   top: -1px;
 }
+.share-options .addthis .custom_button_stocktwits {
+  display: inline-block;
+  float: left;
+  width: 20px;
+  height: 18px;
+  margin: 0 2px;
+  padding: 6px 6px 8px;
+  background: #890A0A;
+  cursor: pointer;
+}
+.share-options .addthis .custom_button_stocktwits .icon {
+  display: inline-block;
+  position: relative;
+  vertical-align: middle;
+  width: 22px;
+  height: 14px;
+  background: url('../images/icons.png') -140px -300px no-repeat;
+}
 .share-options .share-warapper {
   padding: 10px 20px;
   max-width: 910px;
