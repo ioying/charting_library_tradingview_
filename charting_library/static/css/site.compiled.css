@@ -7621,7 +7621,7 @@ div.critical-error {
   left: 0;
   overflow: hidden;
   display: none;
-  z-index: 17;
+  z-index: 1104;
   background: url('../css/fancybox/fancybox_overlay.png');
   cursor: pointer;
 }

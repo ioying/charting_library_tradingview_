@@ -87,7 +87,9 @@ Datafeeds.UDFCompatibleDatafeed.prototype._initialize = function() {
 		.error(function(reason) {
 			that._setupWithConfiguration({
 				supports_search: false,
-				supports_group_request: true
+				supports_group_request: true,
+				supported_resolutions: [1, 5, 15, 30, 60, "1D", "1W", "1M"],
+				supports_marks: false
 			});
 		});
 }
@@ -389,7 +391,7 @@ Datafeeds.SymbolsStorage.prototype._requestFullSymbolsList = function() {
 
 		this._exchangesWaitingForData[exchange] = "waiting_for_data";
 
-		this._datafeed._send(this._datafeedURL + "/symbol_info", {
+		this._datafeed._send(this._datafeed._datafeedURL + "/symbol_info", {
 				group: exchange
 			})
 			.done(function(exchange) {
@@ -446,6 +448,7 @@ Datafeeds.SymbolsStorage.prototype._onExchangeDataReceived = function(exchangeNa
 				pointvalue: tableField(data, "pointvalue", symbolIndex),
 				pricescale: tableField(data, "pricescale", symbolIndex),
 				type: tableField(data, "type", symbolIndex),
+				session: tableField(data, "session-regular", symbolIndex),
 				ticker: tickerPresent ? tableField(data, "ticker", symbolIndex) : symbolName,
 				timezone: tableField(data, "timezone", symbolIndex)
 			};
