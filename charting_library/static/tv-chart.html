@@ -241,14 +241,12 @@ function createChart() {
 	});
 
 
-	if (!urlParams.saveimage) {
-		$('<a class="tv-button getimage"><i class="icon"> </i></a>')
-		.click(function(e){
-			getImage(chartWidgetCollection);
-			e.preventDefault();
-		})
-		.appendTo(headerChartPanel.find('.right'));
-	}
+	$('<a class="tv-button getimage"><i class="icon"> </i></a>')
+	.click(function(e){
+		getImage(chartWidgetCollection, { snapshotUrl: urlParams.snapshotUrl });
+		e.preventDefault();
+	})
+	.appendTo(headerChartPanel.find('.right'));
 
 	ChartSaverInstance = new ChartSaver(chartWidgetCollection);
 
