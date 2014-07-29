@@ -9,14 +9,14 @@
 Datafeeds = {};
 
 
-Datafeeds.UDFCompatibleDatafeed = function(datafeedURL) {
+Datafeeds.UDFCompatibleDatafeed = function(datafeedURL, updateFrequency) {
 
 	this._datafeedURL = datafeedURL;
 	this._configuration = undefined;
 
 	this._symbolSearch = null;
 	this._symbolsStorage = null;
-	this._pulseUpdater = new Datafeeds.PulseUpdater(this);
+	this._pulseUpdater = new Datafeeds.PulseUpdater(this, updateFrequency);
 
 	this._enableLogging = false;
 	this._initializationFinished = false;
@@ -557,7 +557,7 @@ Datafeeds.SymbolSearchComponent.prototype.searchSymbolsByName = function(searchA
 	It's a pulse updating component for ExternalDatafeed. It emulates realtime updates with periodic requests.
 */
 
-Datafeeds.PulseUpdater = function(datafeed) {
+Datafeeds.PulseUpdater = function(datafeed, updateFrequency) {
 	this._datafeed = datafeed;
 	this._subscribers = {};
 
@@ -566,7 +566,7 @@ Datafeeds.PulseUpdater = function(datafeed) {
 	this._requestsPending = 0;
 	var that = this;
 
-	setInterval(function() {
+	var update = function() {
 		if (that._requestsPending > 0) {
 			return;
 		}
@@ -627,8 +627,11 @@ Datafeeds.PulseUpdater = function(datafeed) {
 			})(subscriptionRecord);
 
 		}
-	},
-	10 * 1000);
+	}
+
+	if (updateFrequency && updateFrequency > 0) {
+		setInterval(update, updateFrequency);
+	}
 }
 
 

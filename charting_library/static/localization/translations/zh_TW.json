@@ -367,12 +367,12 @@
     "hour_plural_1": "時",
     "hour_plural_2": "時",
     "hour_plural_5": "時",
-    "y_dates": "y",
-    "y_dates_plural": "y",
-    "y_dates_plural_1": "y_dates_plural_1",
-    "y_dates_plural_2": "y_dates_plural_2",
-    "y_dates_plural_5": "y_dates_plural_5",
-    "h_dates": "h",
+    "y_dates": "年",
+    "y_dates_plural": "年",
+    "y_dates_plural_1": "年",
+    "y_dates_plural_2": "年",
+    "y_dates_plural_5": "年",
+    "h_dates": "時",
     "D_dates": "日",
     "W_dates": "週",
     "M_dates": "月",
@@ -559,6 +559,6 @@
     "Step": "步驟",
     "No drawings yet": "尚未繪圖",
     "Lock/Unlock": "鎖定/解鎖",
-    "deviation_input": "deviation",
-    "depth_input": "depth"
+    "deviation_input": "偏差值",
+    "depth_input": "深度"
 }
