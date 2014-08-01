@@ -551,14 +551,14 @@
     "GrandSuperCycle": "超大循環週期",
     "Lock": "鎖定",
     "Width": "寬度",
-    "Line With Breaks": "直線與斷行",
-    "Area With Breaks": "區域與斷行",
+    "Line With Breaks": "線形圖(含休市日)",
+    "Area With Breaks": "山形圖(含休市日)",
     "Type": "類型",
     "Simple": "簡單",
     "With Markers": "與標記",
-    "Step": "步驟",
+    "Step": "階梯",
     "No drawings yet": "尚未繪圖",
     "Lock/Unlock": "鎖定/解鎖",
-    "deviation_input": "偏差值",
+    "deviation_input": "標準差",
     "depth_input": "深度"
 }

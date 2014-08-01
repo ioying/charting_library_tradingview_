@@ -78,6 +78,8 @@ function createChart() {
 		ChartApiInstance.setEnabledStudiesList(JSON.parse(urlParams.enabledStudies));
 	}
 
+	TVSettings.moveFromLocalStorage();
+
 	__defaultsOverrides = JSON.parse(urlParams.overrides);
 
 	var savedContent = !!window.parent.__TVSavedChart
