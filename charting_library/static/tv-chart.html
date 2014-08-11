@@ -178,27 +178,27 @@ function createChart() {
 						'</a>'+
 					'</div>'+
 				'</div>')
-				// .on('mouseenter', function() { $(this).addClass('expanded')    })
-				// .on('mouseleave', function() { $(this).removeClass('expanded') })
+				.on('mouseenter', function() { $(this).addClass('expanded')    })
+				.on('mouseleave', function() { $(this).removeClass('expanded') })
 				.appendTo('.chart-widget');
 			;
 
-			function showAndHideLogo(data) {
-				if (data.method == 'series_completed') {
-					chartWidget.model().mainSeries().onDataLoaded().unsubscribe(this, showAndHideLogo);
-					setTimeout(function() {
-						$('.onchart-tv-logo').addClass('expanded');
-					}, 0.5 * 1000);
-					// setTimeout(function() {
-					// 	var $logo = $('.onchart-tv-logo');
-					// 	if ($logo.is(':not(:hover)')) {
-					// 		$logo.removeClass('expanded');
-					// 	}
-					// }, 20 * 1000);
-				}
-			}
-
-			chartWidget.model().mainSeries().onDataLoaded().subscribe(this, showAndHideLogo);
+			// function showAndHideLogo(data) {
+			// 	if (data.method == 'series_completed') {
+			// 		chartWidget.model().mainSeries().onDataLoaded().unsubscribe(this, showAndHideLogo);
+			// 		setTimeout(function() {
+			// 			$('.onchart-tv-logo').addClass('expanded');
+			// 		}, 0.5 * 1000);
+			// 		setTimeout(function() {
+			// 			var $logo = $('.onchart-tv-logo');
+			// 			if ($logo.is(':not(:hover)')) {
+			// 				$logo.removeClass('expanded');
+			// 			}
+			// 		}, 20 * 1000);
+			// 	}
+			// }
+			//
+			// chartWidget.model().mainSeries().onDataLoaded().subscribe(this, showAndHideLogo);
 		};
 
 	}
@@ -215,8 +215,7 @@ function createChart() {
 	headerChartPanel.css('background-color', '#'+(urlParams.toolbarbg || 'F1F3F6'));
 	$("#footer-chart-panel").css('background-color', '#'+(urlParams.toolbarbg || 'F1F3F6'));
 
-
-	sidetoolbar = new TradingView.ChartSideToolbarWidget({
+	var sidetoolbar = new TradingView.ChartSideToolbarWidget({
 		container: $('.tv-side-toolbar'),
 		chartWidgetCollection: chartWidgetCollection,
 		onWidget: true,
@@ -225,8 +224,11 @@ function createChart() {
 	});
 	window.sideToolbar = sidetoolbar;
 
+	if (urlParams.hideSideToolbar == "true") {
+		sidetoolbar.fold(true);
+	}
+
 	window.lineToolPropertiesToolbar = new TradingView.LineToolPropertiesWidget(chartWidgetCollection);
-	$('.tv-main-panel').css('margin-left', sidetoolbar.element().width() + 'px');
 
 	chartWidget.onDisconnected().subscribe(null, function(critical_error) {
 		if (critical_error) {
