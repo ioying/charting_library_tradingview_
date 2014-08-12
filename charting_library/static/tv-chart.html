@@ -77,6 +77,9 @@ function createChart() {
 	if (urlParams.enabledStudies) {
 		ChartApiInstance.setEnabledStudiesList(JSON.parse(urlParams.enabledStudies));
 	}
+	if (urlParams.disabledStudies) {
+		ChartApiInstance.setDisabledStudiesList(JSON.parse(urlParams.disabledStudies));
+	}
 
 	TVSettings.moveFromLocalStorage();
 
@@ -158,7 +161,6 @@ function createChart() {
 				}
 			};
 		}
-
 	} else {
 
 		createLogo = function () {
@@ -181,24 +183,6 @@ function createChart() {
 				.on('mouseenter', function() { $(this).addClass('expanded')    })
 				.on('mouseleave', function() { $(this).removeClass('expanded') })
 				.appendTo('.chart-widget');
-			;
-
-			// function showAndHideLogo(data) {
-			// 	if (data.method == 'series_completed') {
-			// 		chartWidget.model().mainSeries().onDataLoaded().unsubscribe(this, showAndHideLogo);
-			// 		setTimeout(function() {
-			// 			$('.onchart-tv-logo').addClass('expanded');
-			// 		}, 0.5 * 1000);
-			// 		setTimeout(function() {
-			// 			var $logo = $('.onchart-tv-logo');
-			// 			if ($logo.is(':not(:hover)')) {
-			// 				$logo.removeClass('expanded');
-			// 			}
-			// 		}, 20 * 1000);
-			// 	}
-			// }
-			//
-			// chartWidget.model().mainSeries().onDataLoaded().subscribe(this, showAndHideLogo);
 		};
 
 	}

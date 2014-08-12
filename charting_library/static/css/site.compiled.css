@@ -4855,7 +4855,7 @@ textarea.save-chart-dialog {
   text-overflow: ellipsis;
 }
 .insert-study-tabs {
-  width: 189px;
+  width: 23%;
   float: left;
   display: block;
   font-size: 13px;
@@ -5017,10 +5017,12 @@ textarea.save-chart-dialog {
   padding-top: 20px;
 }
 .insert-study-main {
-  width: 625px;
+  width: 77%;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
   float: left;
   margin-left: -1px;
-  margin-right: -3px;
   border-left: 1px solid #d6d6d6;
   border-top: 1px solid #d6d6d6;
 }
