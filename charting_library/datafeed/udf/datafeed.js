@@ -6,18 +6,17 @@
 	https://docs.google.com/document/d/1rAigRhQUSLgLCzUAiVBJGAB7uchb-PzFVe0Bl8WTtF0
 */
 
-
 Datafeeds = {};
 
 
-Datafeeds.UDFCompatibleDatafeed = function(datafeedURL) {
+Datafeeds.UDFCompatibleDatafeed = function(datafeedURL, updateFrequency) {
 
 	this._datafeedURL = datafeedURL;
 	this._configuration = undefined;
 
 	this._symbolSearch = null;
 	this._symbolsStorage = null;
-	this._pulseUpdater = new Datafeeds.PulseUpdater(this);
+	this._pulseUpdater = new Datafeeds.PulseUpdater(this, updateFrequency);
 
 	this._enableLogging = false;
 	this._initializationFinished = false;
@@ -48,7 +47,6 @@ Datafeeds.UDFCompatibleDatafeed.prototype._fireEvent = function(event, argument)
 	}
 }
 
-
 Datafeeds.UDFCompatibleDatafeed.prototype.onInitialized = function() {
 	this._initializationFinished = true;
 	this._fireEvent("initialized");
@@ -63,19 +61,35 @@ Datafeeds.UDFCompatibleDatafeed.prototype._logMessage = function(message) {
 }
 
 
+Datafeeds.UDFCompatibleDatafeed.prototype._send = function(url, params) {
+	var request = url;
+	if (params) {
+		for (var i = 0; i < Object.keys(params).length; ++i) {
+			var key = Object.keys(params)[i];
+			var value = encodeURIComponent(params[key]);
+			request += (i == 0 ? "?" : "&") + key + "=" + value;
+		}
+	}
+
+	this._logMessage("New request: " + request);
+	return $.ajax(request);
+}
+
 Datafeeds.UDFCompatibleDatafeed.prototype._initialize = function() {
 
 	var that = this;
 
-	$.ajax(this._datafeedURL + "/config").
-		done(function(response) {
+	this._send(this._datafeedURL + "/config")
+		.done(function(response) {
 			var configurationData = JSON.parse(response);
 			that._setupWithConfiguration(configurationData);
-		}).
-		error(function(reason) {
+		})
+		.error(function(reason) {
 			that._setupWithConfiguration({
 				supports_search: false,
-				supports_group_request: true
+				supports_group_request: true,
+				supported_resolutions: [1, 5, 15, 30, 60, "1D", "1W", "1M"],
+				supports_marks: false
 			});
 		});
 }
@@ -131,7 +145,21 @@ Datafeeds.UDFCompatibleDatafeed.prototype._setupWithConfiguration = function(con
 //	===============================================================================================================================
 //	The functions set below is the implementation of JavaScript API.
 
-Datafeeds.UDFCompatibleDatafeed.prototype.getMarks = function (symbolInfo, rangeStart, rangeEnd, onDataCallback) {
+Datafeeds.UDFCompatibleDatafeed.prototype.getMarks = function (symbolInfo, rangeStart, rangeEnd, onDataCallback, resolution) {
+	if (this._configuration.supports_marks) {
+		this._send(this._datafeedURL + "/marks", {
+				symbol: symbolInfo.ticker.toUpperCase(),
+				from : rangeStart,
+				to: rangeEnd,
+				resolution: resolution
+			})
+			.done(function (response) {
+				onDataCallback(JSON.parse(response));
+			})
+			.error(function() {
+				onDataCallback([]);
+			})
+	}
 }
 
 
@@ -140,7 +168,12 @@ Datafeeds.UDFCompatibleDatafeed.prototype.searchSymbolsByName = function(ticker,
 
 	if (this._configuration.supports_search) {
 
-		$.ajax(this._datafeedURL + "/search?limit=" + MAX_SEARCH_RESULTS  +"&query=" + ticker + "&type=" + type + "&exchange=" + exchange)
+		this._send(this._datafeedURL + "/search", {
+				limit: MAX_SEARCH_RESULTS,
+				query: ticker.toUpperCase(),
+				type: type,
+				exchange: exchange
+			})
 			.done(function (response) {
 				var data = JSON.parse(response);
 
@@ -204,10 +237,9 @@ Datafeeds.UDFCompatibleDatafeed.prototype.resolveSymbol = function(symbolName, o
 	}
 
 	if (!this._configuration.supports_group_request) {
-		var requestURL = this._datafeedURL + "/symbols?symbol=" + encodeURIComponent(symbolName.toUpperCase());
-		this._logMessage(requestURL);
-
-		$.ajax(requestURL)
+		this._send(this._datafeedURL + "/symbols", {
+				symbol: symbolName.toUpperCase()
+			})
 			.done(function (response) {
 				var data = JSON.parse(response);
 
@@ -243,15 +275,12 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolut
 		throw "Got a JS time instead of Unix one.";
 	}
 
-	var requestURL = this._datafeedURL + "/history" +
-		"?symbol=" + symbolInfo.ticker.toUpperCase() +
-		"&resolution=" + resolution +
-		"&from=" + rangeStartDate +
-		"&to=" + rangeEndDate;
-
-	this._logMessage("Requesting data from " + requestURL);
-
-	$.ajax(requestURL)
+	this._send(this._datafeedURL + "/history", {
+			symbol: symbolInfo.ticker.toUpperCase(),
+			resolution: resolution,
+			from: rangeStartDate,
+			to: rangeEndDate
+	})
 	.done(function (response) {
 
 		var data = JSON.parse(response);
@@ -363,17 +392,16 @@ Datafeeds.SymbolsStorage.prototype._requestFullSymbolsList = function() {
 
 		this._exchangesWaitingForData[exchange] = "waiting_for_data";
 
-		var requestURL = datafeed._datafeedURL + "/symbol_info?group=" + exchange;
-		this._datafeed._logMessage("requesting exnchage info from " + requestURL);
-
-		$.ajax(requestURL).
-			done(function(exchange) {
+		this._datafeed._send(this._datafeed._datafeedURL + "/symbol_info", {
+				group: exchange
+			})
+			.done(function(exchange) {
 				return function(response) {
 					that._onExchangeDataReceived(exchange, JSON.parse(response));
 					that._onAnyExchangeResponseReceived(exchange);
 				}
-			}(exchange)).
-			error(function(exchange) {
+			}(exchange))
+			.error(function(exchange) {
 				return function (reason) {
 					that._onAnyExchangeResponseReceived(exchange);
 				};
@@ -421,6 +449,7 @@ Datafeeds.SymbolsStorage.prototype._onExchangeDataReceived = function(exchangeNa
 				pointvalue: tableField(data, "pointvalue", symbolIndex),
 				pricescale: tableField(data, "pricescale", symbolIndex),
 				type: tableField(data, "type", symbolIndex),
+				session: tableField(data, "session-regular", symbolIndex),
 				ticker: tickerPresent ? tableField(data, "ticker", symbolIndex) : symbolName,
 				timezone: tableField(data, "timezone", symbolIndex)
 			};
@@ -529,7 +558,7 @@ Datafeeds.SymbolSearchComponent.prototype.searchSymbolsByName = function(searchA
 	It's a pulse updating component for ExternalDatafeed. It emulates realtime updates with periodic requests.
 */
 
-Datafeeds.PulseUpdater = function(datafeed) {
+Datafeeds.PulseUpdater = function(datafeed, updateFrequency) {
 	this._datafeed = datafeed;
 	this._subscribers = {};
 
@@ -538,7 +567,7 @@ Datafeeds.PulseUpdater = function(datafeed) {
 	this._requestsPending = 0;
 	var that = this;
 
-	setInterval(function() {
+	var update = function() {
 		if (that._requestsPending > 0) {
 			return;
 		}
@@ -599,8 +628,11 @@ Datafeeds.PulseUpdater = function(datafeed) {
 			})(subscriptionRecord);
 
 		}
-	},
-	10 * 1000);
+	}
+
+	if (updateFrequency && updateFrequency > 0) {
+		setInterval(update, updateFrequency);
+	}
 }
 
 

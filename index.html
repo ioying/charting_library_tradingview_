@@ -3,6 +3,9 @@
 
 		<title>TradingView Charting Library demo</title>
 
+		<!-- Fix for iOS Safari zooming bug -->
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0">
+
 		<script type="text/javascript" src="charting_library/charting_library.min.js"></script>
 		<script type="text/javascript" src="charting_library/datafeed/udf/datafeed.js"></script>
 
@@ -13,8 +16,7 @@
 			TradingView.onready(function()
 			{
 				var widget = new TradingView.widget({
-					width: '100%',
-					height: '100%',
+					fullscreen: true,
 					symbol: 'AA',
 					interval: 'D',
 					toolbar_bg: '#f4f7f9',
