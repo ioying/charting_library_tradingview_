@@ -1,20 +1,18 @@
-/* Don't forget to invalidate CloudFront cache for '../css/widget.css' via invalidate_cloudfront_widgets.py */
-
 html, body {background: none; overflow: hidden; min-width: 240px; height: 100%;}
 
-#widget-container
+#library-container
 {
 	border: 1px solid #D9DADB;
 	background: #fff;
 }
-#widget-container #showExtendedHoursLink {
+#library-container #showExtendedHoursLink {
 	display: none;
 }
 
-#widget-container .header-chart-panel {
+#library-container .header-chart-panel {
 	min-height: 0px;
 }
-#widget-container .pane-legend-line.main .pane-legend-icon.format {display: none;}
+#library-container .pane-legend-line.main .pane-legend-icon.format {display: none;}
 
 .insert-study-dialog.minimized
 {
@@ -285,12 +283,12 @@ html, body {background: none; overflow: hidden; min-width: 240px; height: 100%;}
 }
 
 /* get image icon without side toolbar */
-.on-cme-widget #widget-container > .cme-saveimage-container {
+.on-cme-widget #library-container > .cme-saveimage-container {
 	position: absolute;
 	left: 8px;
 	bottom: 7px;
 }
-.on-cme-widget #widget-container > .cme-saveimage-container .getimage {
+.on-cme-widget #library-container > .cme-saveimage-container .getimage {
 	margin: 0;
 	padding: 3px 7px 2px 6px;
 	border: none;

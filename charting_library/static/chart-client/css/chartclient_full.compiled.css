@@ -5486,6 +5486,9 @@ a.getimage .icon {
 .tv-side-toolbar .tools-group .button.hidden {
   display: none;
 }
+.tv-side-toolbar .tools-group .button .main.grayed {
+  opacity: 0.3;
+}
 .tv-side-toolbar .help-button-container {
   position: absolute;
   left: 0;

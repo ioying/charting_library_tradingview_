@@ -8,7 +8,7 @@
 	<link href="css/site.compiled.css" rel="stylesheet" type="text/css" />
 	<link href="chart-client/css/chartclient_full.compiled.css" rel="stylesheet" type="text/css" />
 
-	<link rel="stylesheet" type="text/css" href="css/widget.css" />
+	<link rel="stylesheet" type="text/css" href="css/library.css" />
 
 
 </head>
@@ -216,8 +216,9 @@ function createChart() {
 		container: $('.tv-side-toolbar'),
 		chartWidgetCollection: chartWidgetCollection,
 		onWidget: true,
-		enabledDrawings: urlParams.enabledDrawings ? JSON.parse(urlParams.enabledDrawings ) : [],
-		disabledDrawings: urlParams.disabledDrawings ? JSON.parse(urlParams.disabledDrawings ) : []
+		enabledDrawings: urlParams.enabledDrawings ? JSON.parse(urlParams.enabledDrawings) : [],
+		disabledDrawings: urlParams.disabledDrawings ? JSON.parse(urlParams.disabledDrawings) : [],
+		drawingsAccess: urlParams.drawingsAccess ? JSON.parse(urlParams.drawingsAccess) : undefined
 	});
 	window.sideToolbar = sidetoolbar;
 
