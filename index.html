@@ -27,7 +27,7 @@
 					library_path: "charting_library/",
 					locale: "en",
 					//	Regression Trend-related functionality is not implemented yet, so it's hidden for a while
-					disabled_drawings: ["Regression Trend"]
+					drawings_access: { type: 'black', tools: [ { name: "Regression Trend" } ] }
 				});
 
 				widget.onChartReady(function() {

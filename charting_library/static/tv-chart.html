@@ -28,13 +28,13 @@
 	</div>
 </div>
 
-	<script type="text/javascript">
-		var JSServer = {};
-	</script>
+<script type="text/javascript">
+	var JSServer = {};
+	var __initialEnabledFeaturesets = ["charting_library"];
+</script>
 
 
 	<script type="text/javascript" src="tv-chart.min.js"></script>
-
 
 
 <!-- Google Analytics -->
@@ -47,7 +47,6 @@ var domain = document.URL.match(new RegExp("(:?.*://)([^/]+)/.*"))[2];
 ga('create', 'UA-53174009-1', 'auto'); ga('set', { 'hostname': domain, 'page': domain, 'referrer': domain }); ga('send', 'pageview');
 </script>
 <!-- End Google Analytics -->
-
 
 
 <script type="text/javascript">
@@ -73,9 +72,7 @@ function postMessageToParent(event, data) {
 function createChart() {
 
 	if (!Modernizr.canvas || !Modernizr.canvastext) {
-
-		//	TODO: emit an error message
-		window.location = '/badbrowser/';
+		throw "Charting library cannot be running under this browser";
 	}
 
 	is_authenticated = false;
@@ -87,12 +84,12 @@ function createChart() {
 
 	ChartApiInstance = new JSServer.ChartApi(urlParams.datafeedUID);
 
-	if (urlParams.enabledStudies) {
-		ChartApiInstance.setEnabledStudiesList(JSON.parse(urlParams.enabledStudies));
-	}
-	if (urlParams.disabledStudies) {
-		ChartApiInstance.setDisabledStudiesList(JSON.parse(urlParams.disabledStudies));
-	}
+	ChartApiInstance.setStudiesAccessController(ChartApiInstance.createStudiesAccessController(
+			urlParams.studiesAccess, urlParams.enabledStudies, urlParams.disabledStudies));
+
+	JSON.parse(urlParams.disabled_features).map(function(feature) {
+		Featuresets.setEnabled(feature, false);
+	});
 
 	TVSettings.moveFromLocalStorage();
 
@@ -103,7 +100,6 @@ function createChart() {
 		: undefined;
 
 	delete window.parent.__TVSavedChart;
-
 
 	chartWidgetCollection = new TradingView.ChartWidgetCollection({
 		jqParent: $('#chart-area'),
@@ -119,14 +115,13 @@ function createChart() {
 	 	content: savedContent,
 		widgetOptions: {
 			hideIdeas: true,
-			controlBar: true,
 			addVolume: true,
 			handleSessionErrors: true,
 			muteSessionErrors: true,
 			timezone: urlParams.timezone,
 			defSymbol: urlParams.symbol,
 			defInterval: urlParams.interval || 'D',
-			hideSymbolSearch: urlParams.hideSymbolSearch
+			hideSymbolSearch: JSON.parse(urlParams.hideSymbolSearch)
 		}
 	});
 
@@ -137,77 +132,39 @@ function createChart() {
 	headerWidget = new TradingView.ChartHeaderWidgetRestricted({
 		chartWidgetCollection: chartWidgetCollection,
 		headerChartPanel: headerChartPanel,
-		hideStudyTemplates: true,
-		hideSymbolSearch: urlParams.hideSymbolSearch
+		hideStudyTemplates: true
 	});
 
 	TradingView.Linking.bindToChartWidgetCollection(chartWidgetCollection);
 
-	var createLogo = function() {};
-	if (urlParams.logo) {
+	var createLogo = function() {
+		$('.onchart-tv-logo').remove();
+		var $logo = $('<div class="onchart-tv-logo wrapper">'+
+				'<div class="wrapper">'+
+					'<a class="inner" href="https://www.tradingview.com/" target="_blank">'+
 
-		createLogo = function () {
-			$('.onchart-custom-logo').remove();
+						'<img class="solid" src="images/logo-widget-copyright.png" alt="TradingView Logo">'+
+						'<img class="faded" src="images/logo-widget-copyright-faded.png" alt="TradingView Logo">'+
 
-			var filename = (/\.png$/.test(urlParams.logo))
-				? urlParams.logo
-				: urlParams.logo + '.png'
-			;
-			var $logo = $(
-				'<a href="https://www.tradingview.com/" class="onchart-tv-logo" target="_blank">' +
-					'<img src="images/widget-logo/' + filename + '" class="custom-image">' +
-				'</a>'
-			).appendTo('.chart-widget');
+						'<span class="text">'+
+							'charts&nbsp;by&nbsp;'+
+							'<span class="logo-highlighted">TradingView</span>'+
+						'</span>'+
+					'</a>'+
+				'</div>'+
+			'</div>')
+			.on('mouseenter', function() { $(this).addClass('expanded')    })
+			.on('mouseleave', function() { $(this).removeClass('expanded') })
+			.appendTo('.chart-widget');
+	};
 
-			var $img = $logo.find('img');
-
-			var additionLogoParams = ['left','bottom','width','height'];
-			for (var i = additionLogoParams.length - 1; i >= 0; i--) {
-				var param =  additionLogoParams[i];
-				var paramWithPrefix = 'logo_' + param;
-				if (urlParams[paramWithPrefix]) {
-					if (param === 'left' || param === 'bottom') {
-						$logo.css(param, urlParams[paramWithPrefix]);
-					} else {
-						$img.css(param, urlParams[paramWithPrefix]);
-					}
-				}
-			};
-		}
-	} else {
-
-		createLogo = function () {
-			$('.onchart-tv-logo').remove();
-			var colorClass = urlParams.theme ? urlParams.theme.toLowerCase() : ''; // black, white, blue, grey
-			var $logo = $('<div class="onchart-tv-logo wrapper ' + colorClass + '">'+
-					'<div class="wrapper">'+
-						'<a class="inner" href="https://www.tradingview.com/" target="_blank">'+
-	
-							'<img class="solid" src="images/logo-widget-copyright.png" alt="TradingView Logo">'+
-							'<img class="faded" src="images/logo-widget-copyright-faded.png" alt="TradingView Logo">'+
-	
-							'<span class="text">'+
-								'charts&nbsp;by&nbsp;'+
-								'<span class="logo-highlighted">TradingView</span>'+
-							'</span>'+
-						'</a>'+
-					'</div>'+
-				'</div>')
-				.on('mouseenter', function() { $(this).addClass('expanded')    })
-				.on('mouseleave', function() { $(this).removeClass('expanded') })
-				.appendTo('.chart-widget');
-		};
-
-	}
-
-	if (urlParams.disableLogo == "false") {
+	if (urlParams.disableLogo == "false" || !Featuresets.enabled('widget_logo'))  {
 		chartWidget.withModel(null, createLogo);
 	}
 
 	TradingView.tokenInitialized.resolve();
 
-	window.studyTemplates = new TradingView.StudyTemplates({chartWidgetCollection: chartWidgetCollection});
-	ChartApiInstance.start();
+	//	window.studyTemplates = new TradingView.StudyTemplates({chartWidgetCollection: chartWidgetCollection});
 
 	headerChartPanel.css('background-color', '#'+(urlParams.toolbarbg || 'F1F3F6'));
 	$("#footer-chart-panel").css('background-color', '#'+(urlParams.toolbarbg || 'F1F3F6'));
@@ -222,7 +179,10 @@ function createChart() {
 	});
 	window.sideToolbar = sidetoolbar;
 
-	if (urlParams.hideSideToolbar == "true") {
+
+
+
+	if (urlParams.hideSideToolbar == "true" || !Featuresets.enabled('left_toolbar')) {
 		sidetoolbar.fold(true);
 	}
 
@@ -242,13 +202,16 @@ function createChart() {
 		}
 	});
 
+	ChartApiInstance.start();
 
-	$('<a class="tv-button getimage"><i class="icon"> </i></a>')
-	.click(function(e){
-		getImage(chartWidgetCollection, { snapshotUrl: urlParams.snapshotUrl });
-		e.preventDefault();
-	})
-	.appendTo(headerChartPanel.find('.right'));
+	if (Featuresets.enabled('header_screenshot')) {
+		$('<a class="tv-button getimage"><i class="icon"> </i></a>')
+		.click(function(e){
+			getImage(chartWidgetCollection, { snapshotUrl: urlParams.snapshotUrl });
+			e.preventDefault();
+		})
+		.appendTo(headerChartPanel.find('.right'));
+	}
 
 	ChartSaverInstance = new ChartSaver(chartWidgetCollection);
 
@@ -315,8 +278,22 @@ function createChart() {
 
 
 		pm.on('changeSymbol', function(data) {
-			TradingView.Linking.symbol.setValue(data.symbol);
 			TradingView.Linking.interval.setValue(data.interval);
+			TradingView.Linking.symbol.setValue(data.symbol);
+
+			function eventHandler() {
+				chartWidget.model().mainSeries().onDataLoaded().unsubscribe(null, eventHandler);
+				pm.post(window.parent, 'symbolChangeFinished', {});
+			}
+
+			chartWidget.model().mainSeries().onDataLoaded().subscribe(null, eventHandler);
+		});
+
+		pm.on('symbolIntervalRequest', function() {
+			pm.post(window.parent, 'symbolInterval', JSON.stringify({
+				symbol: TradingView.Linking.symbol.value(),
+				interval: TradingView.Linking.interval.value()
+			}));
 		});
 
 
@@ -387,38 +364,38 @@ function createChart() {
 		});
 	})();
 
+	chartWidget.modelCreated().subscribe(null, function() {
+		chartWidget.model().mainSeries().onSymbolResolved().subscribe(null, function() {
+			var symbolInfo = chartWidget.model().mainSeries().symbolInfo(),
+				interval = chartWidget.model().mainSeries().properties().interval.value(),
+				result = {
+					name: symbolInfo.name,
+					exchange: symbolInfo.exchange,
+					description: symbolInfo.description,
+					type: symbolInfo.type,
+					interval: interval
+				};
 
-	chartWidget.model().mainSeries().onSymbolResolved().subscribe(null, function() {
-		var symbolInfo = chartWidget.model().mainSeries().symbolInfo(),
-		interval = chartWidget.model().mainSeries().properties().interval.value(),
-		result = {
-			name: symbolInfo.name,
-			exchange: symbolInfo.exchange,
-			description: symbolInfo.description,
-			type: symbolInfo.type,
-			interval: interval
-		};
+			postMessageToParent('onSymbolChange', result);
+		});
 
-		postMessageToParent('onSymbolChange', result);
+		TradingView.Linking.interval.subscribe(function(interval){
+			postMessageToParent('onIntervalChange', interval)
+		});
+
+		ChartApiInstance.on('realtime_tick', function(tick) {
+			postMessageToParent('onTick', tick);
+		});
+
+		ChartApiInstance.on('onAutoSaveNeeded', function() {
+			postMessageToParent('onAutoSaveNeeded');
+		});
+
+		GlobalEventsStorage.subscribe("onMarkClick", function(markID) {
+			postMessageToParent('onMarkClick', markID);
+		});
 	});
-
-	TradingView.Linking.interval.subscribe(function(interval){
-		postMessageToParent('onIntervalChange', interval)
-	});
-
-	ChartApiInstance.on('realtime_tick', function(tick) {
-		postMessageToParent('onTick', tick);
-	});
-
-	ChartApiInstance.on('onAutoSaveNeeded', function() {
-		postMessageToParent('onAutoSaveNeeded');
-	});
-
-	GlobalEventsStorage.subscribe("onMarkClick", function(markID) {
-		postMessageToParent('onMarkClick', markID);
-	});
-
-};
+}
 
 
 </script>

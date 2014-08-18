@@ -16,7 +16,8 @@ Datafeeds.UDFCompatibleDatafeed = function(datafeedURL, updateFrequency) {
 
 	this._symbolSearch = null;
 	this._symbolsStorage = null;
-	this._pulseUpdater = new Datafeeds.PulseUpdater(this, updateFrequency);
+	this._barsPulseUpdater = new Datafeeds.DataPulseUpdater(this, updateFrequency);
+	this._quotesPulseUpdater = new Datafeeds.QuotesPulseUpdater(this);
 
 	this._enableLogging = false;
 	this._initializationFinished = false;
@@ -25,6 +26,14 @@ Datafeeds.UDFCompatibleDatafeed = function(datafeedURL, updateFrequency) {
 	this._initialize();
 }
 
+Datafeeds.UDFCompatibleDatafeed.prototype.defaultConfiguration = function() {
+	return {
+		supports_search: false,
+		supports_group_request: true,
+		supported_resolutions: [1, 5, 15, 30, 60, "1D", "1W", "1M"],
+		supports_marks: false
+	};
+}
 
 Datafeeds.UDFCompatibleDatafeed.prototype.on = function (event, callback) {
 
@@ -85,12 +94,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype._initialize = function() {
 			that._setupWithConfiguration(configurationData);
 		})
 		.error(function(reason) {
-			that._setupWithConfiguration({
-				supports_search: false,
-				supports_group_request: true,
-				supported_resolutions: [1, 5, 15, 30, 60, "1D", "1W", "1M"],
-				supports_marks: false
-			});
+			that._setupWithConfiguration(that.defaultConfiguration());
 		});
 }
 
@@ -223,6 +227,9 @@ Datafeeds.UDFCompatibleDatafeed.prototype.searchSymbolsByName = function(ticker,
 }
 
 
+Datafeeds.UDFCompatibleDatafeed.prototype._symbolResolveURL = "/symbols";
+
+
 //	BEWARE: this function does not consider symbol's exchange
 Datafeeds.UDFCompatibleDatafeed.prototype.resolveSymbol = function(symbolName, onSymbolResolvedCallback, onResolveErrorCallback) {
 
@@ -237,8 +244,8 @@ Datafeeds.UDFCompatibleDatafeed.prototype.resolveSymbol = function(symbolName, o
 	}
 
 	if (!this._configuration.supports_group_request) {
-		this._send(this._datafeedURL + "/symbols", {
-				symbol: symbolName.toUpperCase()
+		this._send(this._datafeedURL + this._symbolResolveURL, {
+				symbol: symbolName ? symbolName.toUpperCase() : ""
 			})
 			.done(function (response) {
 				var data = JSON.parse(response);
@@ -267,6 +274,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.resolveSymbol = function(symbolName, o
 }
 
 
+Datafeeds.UDFCompatibleDatafeed.prototype._historyURL = "/history";
 
 Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolution, rangeStartDate, rangeEndDate, onDataCallback, onErrorCallback) {
 
@@ -275,7 +283,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolut
 		throw "Got a JS time instead of Unix one.";
 	}
 
-	this._send(this._datafeedURL + "/history", {
+	this._send(this._datafeedURL + this._historyURL, {
 			symbol: symbolInfo.ticker.toUpperCase(),
 			resolution: resolution,
 			from: rangeStartDate,
@@ -340,15 +348,39 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolut
 
 
 Datafeeds.UDFCompatibleDatafeed.prototype.subscribeBars = function(symbolInfo, resolution, onRealtimeCallback, listenerGUID) {
-	this._pulseUpdater.subscribeDataListener(symbolInfo, resolution, onRealtimeCallback, listenerGUID);
+	this._barsPulseUpdater.subscribeDataListener(symbolInfo, resolution, onRealtimeCallback, listenerGUID);
 }
 
 Datafeeds.UDFCompatibleDatafeed.prototype.unsubscribeBars = function(listenerGUID) {
-	this._pulseUpdater.unsubscribeDataListener(listenerGUID);
+	this._barsPulseUpdater.unsubscribeDataListener(listenerGUID);
 }
 
 Datafeeds.UDFCompatibleDatafeed.prototype.calculateHistoryDepth = function(period, resolutionBack, intervalBack) {
 }
+
+Datafeeds.UDFCompatibleDatafeed.prototype.getQuotes = function(symbols, onDataCallback, onErrorCallback) {
+	this._send(this._datafeedURL + "/quotes", { symbols: symbols })
+		.done(function (response) {
+			var data = JSON.parse(response);
+			if (data.s == "ok") {
+				//	JSON format is {s: "status", [{s: "symbol_status", n: "symbol_name", v: {"field1": "value1", "field2": "value2", ..., "fieldN": "valueN"}}]}
+				onDataCallback && onDataCallback(data.d);
+			} else {
+				onErrorCallback && onErrorCallback(data.errmsg);
+			}
+		})
+		.error(function (arg) {
+			onErrorCallback && onErrorCallback("network error: " + arg);
+		});
+};
+
+Datafeeds.UDFCompatibleDatafeed.prototype.subscribeQuotes = function(symbols, fastSymbols, onRealtimeCallback, listenerGUID) {
+	this._quotesPulseUpdater.subscribeDataListener(symbols, fastSymbols, onRealtimeCallback, listenerGUID);
+};
+
+Datafeeds.UDFCompatibleDatafeed.prototype.unsubscribeQuotes = function(listenerGUID) {
+	this._quotesPulseUpdater.unsubscribeDataListener(listenerGUID);
+};
 
 //	==================================================================================================================================================
 //	==================================================================================================================================================
@@ -555,10 +587,10 @@ Datafeeds.SymbolSearchComponent.prototype.searchSymbolsByName = function(searchA
 //	==================================================================================================================================================
 
 /*
-	It's a pulse updating component for ExternalDatafeed. It emulates realtime updates with periodic requests.
+	This is a pulse updating components for ExternalDatafeed. They emulates realtime updates with periodic requests.
 */
 
-Datafeeds.PulseUpdater = function(datafeed, updateFrequency) {
+Datafeeds.DataPulseUpdater = function(datafeed, updateFrequency) {
 	this._datafeed = datafeed;
 	this._subscribers = {};
 
@@ -630,19 +662,19 @@ Datafeeds.PulseUpdater = function(datafeed, updateFrequency) {
 		}
 	}
 
-	if (updateFrequency && updateFrequency > 0) {
+	if (typeof updateFrequency != "undefined" && updateFrequency > 0) {
 		setInterval(update, updateFrequency);
 	}
 }
 
 
-Datafeeds.PulseUpdater.prototype.unsubscribeDataListener = function(listenerGUID) {
+Datafeeds.DataPulseUpdater.prototype.unsubscribeDataListener = function(listenerGUID) {
 	this._datafeed._logMessage("Unsubscribing " + listenerGUID);
 	delete this._subscribers[listenerGUID];
 }
 
 
-Datafeeds.PulseUpdater.prototype.subscribeDataListener = function(symbolInfo, resolution, newDataCallback, listenerGUID) {
+Datafeeds.DataPulseUpdater.prototype.subscribeDataListener = function(symbolInfo, resolution, newDataCallback, listenerGUID) {
 
 	this._datafeed._logMessage("Subscribing " + listenerGUID);
 
@@ -662,7 +694,7 @@ Datafeeds.PulseUpdater.prototype.subscribeDataListener = function(symbolInfo, re
 }
 
 
-Datafeeds.PulseUpdater.prototype.periodLengthSeconds = function(resolution, requiredPeriodsCount) {
+Datafeeds.DataPulseUpdater.prototype.periodLengthSeconds = function(resolution, requiredPeriodsCount) {
 	var daysCount = 0;
 
 	if (resolution == "D") {
@@ -680,3 +712,70 @@ Datafeeds.PulseUpdater.prototype.periodLengthSeconds = function(resolution, requ
 
 	return daysCount * 24 * 60 * 60;
 }
+
+
+Datafeeds.QuotesPulseUpdater = function(datafeed) {
+	this._datafeed = datafeed;
+	this._subscribers = {};
+	this._updateInterval = 60 * 1000;
+	this._fastUpdateInterval = 10 * 1000;
+	this._requestsPending = 0;
+
+	var that = this;
+
+	setInterval(function() {
+		that._updateQuotes(function(subscriptionRecord) { return subscriptionRecord.symbols; })
+	}, this._updateInterval);
+
+	setInterval(function() {
+		that._updateQuotes(function(subscriptionRecord) { return subscriptionRecord.fastSymbols.length > 0 ? subscriptionRecord.fastSymbols : subscriptionRecord.symbols; })
+	}, this._fastUpdateInterval);
+};
+
+Datafeeds.QuotesPulseUpdater.prototype.subscribeDataListener = function(symbols, fastSymbols, newDataCallback, listenerGUID) {
+	if (!this._subscribers.hasOwnProperty(listenerGUID)) {
+		this._subscribers[listenerGUID] = {
+			symbols: symbols,
+			fastSymbols: fastSymbols,
+			listeners: []
+		};
+	}
+	this._subscribers[listenerGUID].listeners.push(newDataCallback);
+};
+
+Datafeeds.QuotesPulseUpdater.prototype.unsubscribeDataListener = function(listenerGUID) {
+	delete this._subscribers[listenerGUID];
+};
+
+Datafeeds.QuotesPulseUpdater.prototype._updateQuotes = function(symbolsGetter) {
+	if (this._requestsPending > 0) {
+		return;
+	}
+
+	var that = this;
+	for (var listenerGUID in this._subscribers) {
+		this._requestsPending++;
+
+		var subscriptionRecord = this._subscribers[listenerGUID];
+		this._datafeed.getQuotes(symbolsGetter(subscriptionRecord),
+			// onDataCallback
+			function(subscribers, guid) {
+				return function(data) {
+					that._requestsPending--;
+
+					// means the subscription was cancelled while waiting for data
+					if (!that._subscribers.hasOwnProperty(guid)) {
+						return;
+					}
+
+					for (var i =0; i < subscribers.length; ++i) {
+						subscribers[i](data);
+					}
+				}
+			}(subscriptionRecord.listeners, listenerGUID),
+			// onErrorCallback
+			function (error) {
+				that._requestsPending--;
+			});
+	}
+};

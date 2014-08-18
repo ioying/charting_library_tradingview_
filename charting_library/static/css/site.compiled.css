@@ -5103,6 +5103,12 @@ textarea.save-chart-dialog {
   position: relative;
   -webkit-transform: translate3d(0, 0, 0);
 }
+.insert-study-items li.grayed .text {
+  opacity: 0.3;
+}
+.insert-study-items li.grayed .fav.in-fav {
+  visibility: hidden;
+}
 .insert-study-items li.custom-script,
 .insert-study-items li.published-script {
   padding-right: 28px;
@@ -5125,10 +5131,10 @@ textarea.save-chart-dialog {
   height: 14px;
   background: url('../images/icons.png') -40px -280px;
 }
-.insert-study-items li .fav:hover:not(.in-fav) {
+.insert-study-items li:not(.grayed) .fav:hover:not(.in-fav) {
   background-position: -120px -363px;
 }
-.insert-study-items li .in-fav {
+.insert-study-items li:not(.grayed) .in-fav {
   background-position: -20px -280px;
 }
 .insert-study-items li.custom-script .source {
