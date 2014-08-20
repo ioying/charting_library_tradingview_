@@ -91,7 +91,9 @@ function createChart() {
 		Featuresets.setEnabled(feature, false);
 	});
 
-	TVSettings.moveFromLocalStorage();
+	if (Featuresets.enabled("use_localstorage_for_settings")) {
+		TVSettings.moveFromLocalStorage();
+	}
 
 	__defaultsOverrides = JSON.parse(urlParams.overrides);
 

@@ -30,7 +30,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.defaultConfiguration = function() {
 	return {
 		supports_search: false,
 		supports_group_request: true,
-		supported_resolutions: [1, 5, 15, 30, 60, "1D", "1W", "1M"],
+		supported_resolutions: ["1", "5", "15", "30", "60", "1D", "1W", "1M"],
 		supports_marks: false
 	};
 }
@@ -121,9 +121,13 @@ Datafeeds.UDFCompatibleDatafeed.prototype._setupWithConfiguration = function(con
 		configurationData.exchanges = [];
 	}
 
-	if (!configurationData.symbolsTypes) {
-		configurationData.symbolsTypes = [];
-	}
+	//	@obsolete; remove in 1.5
+	var supportedResolutions = configurationData.supported_resolutions || configurationData.supportedResolutions;
+	configurationData.supported_resolutions = supportedResolutions;
+
+	//	@obsolete; remove in 1.5
+	var symbolsTypes = configurationData.symbols_types || configurationData.symbolsTypes;
+	configurationData.symbols_types = symbolsTypes;
 
 	if (configurationData.supports_search == false && configurationData.supports_group_request == false) {
 		throw "Unsupported datafeed configuration. Must either support search, or support group request";
@@ -483,7 +487,14 @@ Datafeeds.SymbolsStorage.prototype._onExchangeDataReceived = function(exchangeNa
 				type: tableField(data, "type", symbolIndex),
 				session: tableField(data, "session-regular", symbolIndex),
 				ticker: tickerPresent ? tableField(data, "ticker", symbolIndex) : symbolName,
-				timezone: tableField(data, "timezone", symbolIndex)
+				timezone: tableField(data, "timezone", symbolIndex),
+				supported_resolutions: tableField(data, "supported-resolutions", symbolIndex) || this._datafeed.defaultConfiguration().supported_resolutions,
+				force_session_rebuild: tableField(data, "force-session-rebuild", symbolIndex) || false,
+				has_daily: tableField(data, "has-daily", symbolIndex) || true,
+				intraday_multipliers: tableField(data, "intraday-multipliers", symbolIndex) || ["1", "5", "15", "30", "60"],
+				has_fractional_volume: tableField(data, "has-fractional-volume", symbolIndex) || false,
+				has_weekly_and_monthly: tableField(data, "has-weekly-and-monthly", symbolIndex) || false,
+				has_empty_bars: tableField(data, "has-empty-bars", symbolIndex) || false
 			};
 
 			this._symbolsInfo[symbolName] = this._symbolsInfo[fullName];
