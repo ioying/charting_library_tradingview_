@@ -471,7 +471,7 @@ Datafeeds.SymbolsStorage.prototype._onExchangeDataReceived = function(exchangeNa
 
 			var tickerPresent = typeof data["ticker"] != "undefined";
 
-			this._symbolsInfo[fullName] = {
+			var symbolInfo = {
 				name: symbolName,
 				base_name: [listedExchange + ":" + symbolName],
 				description: tableField(data, "description", symbolIndex),
@@ -497,7 +497,7 @@ Datafeeds.SymbolsStorage.prototype._onExchangeDataReceived = function(exchangeNa
 				has_empty_bars: tableField(data, "has-empty-bars", symbolIndex) || false
 			};
 
-			this._symbolsInfo[symbolName] = this._symbolsInfo[fullName];
+			this._symbolsInfo[symbolInfo.ticker] = this._symbolsInfo[symbolName] = this._symbolsInfo[fullName] = symbolInfo;
 			this._symbolsList.push(symbolName);
 		}
 	}
@@ -579,7 +579,8 @@ Datafeeds.SymbolSearchComponent.prototype.searchSymbolsByName = function(searchA
 				description: item.description,
 				exchange: item.exchange,
 				params: [],
-				type: item.type
+				type: item.type,
+				ticker: item.name
 			});
 		}
 
