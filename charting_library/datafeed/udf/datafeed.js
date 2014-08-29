@@ -16,7 +16,7 @@ Datafeeds.UDFCompatibleDatafeed = function(datafeedURL, updateFrequency) {
 
 	this._symbolSearch = null;
 	this._symbolsStorage = null;
-	this._barsPulseUpdater = new Datafeeds.DataPulseUpdater(this, updateFrequency);
+	this._barsPulseUpdater = new Datafeeds.DataPulseUpdater(this, updateFrequency || 10 * 1000);
 	this._quotesPulseUpdater = new Datafeeds.QuotesPulseUpdater(this);
 
 	this._enableLogging = false;
@@ -174,6 +174,10 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getMarks = function (symbolInfo, range
 Datafeeds.UDFCompatibleDatafeed.prototype.searchSymbolsByName = function(ticker, exchange, type, onResultReadyCallback) {
 	var MAX_SEARCH_RESULTS = 30;
 
+	if (!this._configuration) {
+		onResultReadyCallback([]);
+	}
+
 	if (this._configuration.supports_search) {
 
 		this._send(this._datafeedURL + "/search", {
@@ -247,6 +251,14 @@ Datafeeds.UDFCompatibleDatafeed.prototype.resolveSymbol = function(symbolName, o
 		return;
 	}
 
+	function onResultReady(data) {
+		var postProcessedData = data;
+		if (that.postProcessSymbolInfo) {
+			postProcessedData = that.postProcessSymbolInfo(postProcessedData);
+		}
+		onSymbolResolvedCallback(postProcessedData);
+	}
+
 	if (!this._configuration.supports_group_request) {
 		this._send(this._datafeedURL + this._symbolResolveURL, {
 				symbol: symbolName ? symbolName.toUpperCase() : ""
@@ -258,7 +270,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.resolveSymbol = function(symbolName, o
 					onResolveErrorCallback("unknown_symbol");
 				}
 				else {
-					onSymbolResolvedCallback(data)
+					onResultReady(data)
 				}
 			})
 			.error(function(reason) {
@@ -267,11 +279,11 @@ Datafeeds.UDFCompatibleDatafeed.prototype.resolveSymbol = function(symbolName, o
 	}
 	else {
 		if (this._initializationFinished) {
-			this._symbolsStorage.resolveSymbol(symbolName, onSymbolResolvedCallback, onResolveErrorCallback);
+			this._symbolsStorage.resolveSymbol(symbolName, onResultReady, onResolveErrorCallback);
 		}
 		else {
 			this.on("initialized", function() {
-				that._symbolsStorage.resolveSymbol(symbolName, onSymbolResolvedCallback, onResolveErrorCallback);
+				that._symbolsStorage.resolveSymbol(symbolName, onResultReady, onResolveErrorCallback);
 			});
 		}
 	}
@@ -494,7 +506,8 @@ Datafeeds.SymbolsStorage.prototype._onExchangeDataReceived = function(exchangeNa
 				intraday_multipliers: tableField(data, "intraday-multipliers", symbolIndex) || ["1", "5", "15", "30", "60"],
 				has_fractional_volume: tableField(data, "has-fractional-volume", symbolIndex) || false,
 				has_weekly_and_monthly: tableField(data, "has-weekly-and-monthly", symbolIndex) || false,
-				has_empty_bars: tableField(data, "has-empty-bars", symbolIndex) || false
+				has_empty_bars: tableField(data, "has-empty-bars", symbolIndex) || false,
+				volume_precision: tableField(data, "volume-precision", symbolIndex) || 0
 			};
 
 			this._symbolsInfo[symbolInfo.ticker] = this._symbolsInfo[symbolName] = this._symbolsInfo[fullName] = symbolInfo;
