@@ -176,6 +176,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.searchSymbolsByName = function(ticker,
 
 	if (!this._configuration) {
 		onResultReadyCallback([]);
+		return;
 	}
 
 	if (this._configuration.supports_search) {
