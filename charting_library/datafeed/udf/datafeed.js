@@ -620,8 +620,6 @@ Datafeeds.DataPulseUpdater = function(datafeed, updateFrequency) {
 	this._datafeed = datafeed;
 	this._subscribers = {};
 
-
-	this._lastBarTime = 0;
 	this._requestsPending = 0;
 	var that = this;
 
@@ -656,6 +654,9 @@ Datafeeds.DataPulseUpdater = function(datafeed, updateFrequency) {
 					}
 
 					var subscribers = _subscriptionRecord.listeners;
+
+					//	BEWARE: this one isn't working when first update comes and this update makes a new bar. In this case
+					//	_subscriptionRecord.lastBarTime = NaN
 					var isNewBar = !isNaN(_subscriptionRecord.lastBarTime) && lastBar.time > _subscriptionRecord.lastBarTime;
 
 					//	Pulse updating may miss some trades data (ie, if pulse period = 10 secods and new bar is started 5 seconds later after the last update, the

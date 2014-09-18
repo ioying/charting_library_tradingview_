@@ -634,5 +634,8 @@
     "Invalid Symbol": "Invalid Symbol",
     "loading...": "loading...",
     "interval_dialog_description": "Type the interval number for munute charts (i.e. 5 if it is going to be a five minute chart). Or number plus letter for H (Hourly), D (Daily), W (Weekly), M (Monthly) intervals (i.e. D or 2H)",
-    "Not applicable": "Not applicable"
+    "Not applicable": "Not applicable",
+    "Stats Text Color": "Stats Text Color",
+    "Show Angle": "Show Angle",
+    "Always Show Stats": "Always Show Stats"
 }

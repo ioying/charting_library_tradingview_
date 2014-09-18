@@ -634,5 +634,8 @@
     "Invalid Symbol": "無效的標的",
     "loading...": "載入中...",
     "interval_dialog_description": "若圖表採用分鐘作為更新頻率，請輸入間隔數字(例如：若圖表為每五分鐘更新一次，請輸入5)；或加上H代表小時，D代表日，W代表週，M代表月為週期更新頻率。",
-    "Not applicable": "Not applicable"
+    "Not applicable": "Not applicable",
+    "Stats Text Color": "Stats Text Color",
+    "Show Angle": "Show Angle",
+    "Always Show Stats": "Always Show Stats"
 }
