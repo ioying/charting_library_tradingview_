@@ -32,7 +32,12 @@
 					locale: "en",
 					//	Regression Trend-related functionality is not implemented yet, so it's hidden for a while
 					drawings_access: { type: 'black', tools: [ { name: "Regression Trend" } ] },
+					indicators_file_name: 'http://e12:9090/indicators.js',
 					disabled_features: ["use_localstorage_for_settings"],
+					overrides: {
+						"mainSeriesProperties.style": 0,
+						"symbolWatermarkProperties.color" : "#644"
+					},
 					studies_overrides: {
 						"volume.volume.color.0": "#00FFFF",
 						"volume.volume.color.1": "#0000FF",
@@ -57,7 +62,10 @@
 						{ text: "3d", resolution: "10" },
 						{ text: "2d", resolution: "5" },
 						{ text: "1d", resolution: "5" },
-					]
+					],
+					charts_storage_url: 'http://saveload.tradingview.com',
+					client_id: 'tradingview.com',
+					user_id: 'public_user_id'
 				});
 
 				var savedWidgetContent = null;
@@ -140,6 +148,15 @@
 						 })
 						.append($('<span>+ MA cross</span>'));
 
+					widget.createButton()
+						.on('click', function (e) {
+							widget.createOrderLine();
+						 })
+						.append($('<span>new order</span>'));
+
+					widget.onGrayedObjectClicked(function(x) {
+						alert("You are not permitted to use " + x.name + "(" + x.type + ")");
+					});
 
 					widget.onIntervalChange(function(x) {
 						console.log("onIntervalChange: " + x);
