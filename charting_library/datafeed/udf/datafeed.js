@@ -24,7 +24,7 @@ Datafeeds.UDFCompatibleDatafeed = function(datafeedURL, updateFrequency) {
 	this._callbacks = {};
 
 	this._initialize();
-}
+};
 
 Datafeeds.UDFCompatibleDatafeed.prototype.defaultConfiguration = function() {
 	return {
@@ -33,7 +33,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.defaultConfiguration = function() {
 		supported_resolutions: ["1", "5", "15", "30", "60", "1D", "1W", "1M"],
 		supports_marks: false
 	};
-}
+};
 
 Datafeeds.UDFCompatibleDatafeed.prototype.on = function (event, callback) {
 
@@ -43,7 +43,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.on = function (event, callback) {
 
 	this._callbacks[event].push(callback);
 	return this;
-}
+};
 
 
 Datafeeds.UDFCompatibleDatafeed.prototype._fireEvent = function(event, argument) {
@@ -54,20 +54,21 @@ Datafeeds.UDFCompatibleDatafeed.prototype._fireEvent = function(event, argument)
 		}
 		this._callbacks[event] = [];
 	}
-}
+};
 
 Datafeeds.UDFCompatibleDatafeed.prototype.onInitialized = function() {
 	this._initializationFinished = true;
 	this._fireEvent("initialized");
-}
+};
 
 
 
 Datafeeds.UDFCompatibleDatafeed.prototype._logMessage = function(message) {
 	if (this._enableLogging) {
-		console.log(message);
+		var now = new Date();
+		console.log(now.toLocaleTimeString() + "." + now.getMilliseconds() + "> " + message);
 	}
-}
+};
 
 
 Datafeeds.UDFCompatibleDatafeed.prototype._send = function(url, params) {
@@ -76,13 +77,14 @@ Datafeeds.UDFCompatibleDatafeed.prototype._send = function(url, params) {
 		for (var i = 0; i < Object.keys(params).length; ++i) {
 			var key = Object.keys(params)[i];
 			var value = encodeURIComponent(params[key]);
-			request += (i == 0 ? "?" : "&") + key + "=" + value;
+			request += (i === 0 ? "?" : "&") + key + "=" + value;
 		}
 	}
 
 	this._logMessage("New request: " + request);
+
 	return $.ajax(request);
-}
+};
 
 Datafeeds.UDFCompatibleDatafeed.prototype._initialize = function() {
 
@@ -93,10 +95,10 @@ Datafeeds.UDFCompatibleDatafeed.prototype._initialize = function() {
 			var configurationData = JSON.parse(response);
 			that._setupWithConfiguration(configurationData);
 		})
-		.error(function(reason) {
+		.fail(function(reason) {
 			that._setupWithConfiguration(that.defaultConfiguration());
 		});
-}
+};
 
 
 Datafeeds.UDFCompatibleDatafeed.prototype.setup = function(studyEngineOptions, callback) {
@@ -110,9 +112,9 @@ Datafeeds.UDFCompatibleDatafeed.prototype.setup = function(studyEngineOptions, c
 		this.on("configuration_ready", function() {
 			that._configuration.engine = studyEngineOptions;
 			callback(that._configuration);
-		})
+		});
 	}
-}
+};
 
 Datafeeds.UDFCompatibleDatafeed.prototype._setupWithConfiguration = function(configurationData) {
 	this._configuration = configurationData;
@@ -129,15 +131,15 @@ Datafeeds.UDFCompatibleDatafeed.prototype._setupWithConfiguration = function(con
 	var symbolsTypes = configurationData.symbols_types || configurationData.symbolsTypes;
 	configurationData.symbols_types = symbolsTypes;
 
-	if (configurationData.supports_search == false && configurationData.supports_group_request == false) {
+	if (!configurationData.supports_search && !configurationData.supports_group_request) {
 		throw "Unsupported datafeed configuration. Must either support search, or support group request";
 	}
 
-	if (configurationData.supports_search == false) {
+	if (!configurationData.supports_search) {
 		this._symbolSearch = new Datafeeds.SymbolSearchComponent(this);
 	}
 
-	if (configurationData.supports_group_request == true) {
+	if (configurationData.supports_group_request) {
 		//	this component will call onInitialized() by itself
 		this._symbolsStorage = new Datafeeds.SymbolsStorage(this);
 	}
@@ -147,7 +149,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype._setupWithConfiguration = function(con
 
 	this._fireEvent("configuration_ready");
 	this._logMessage("Initialized with " + JSON.stringify(configurationData));
-}
+};
 
 
 //	===============================================================================================================================
@@ -164,11 +166,11 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getMarks = function (symbolInfo, range
 			.done(function (response) {
 				onDataCallback(JSON.parse(response));
 			})
-			.error(function() {
+			.fail(function() {
 				onDataCallback([]);
-			})
+			});
 	}
-}
+};
 
 
 Datafeeds.UDFCompatibleDatafeed.prototype.searchSymbolsByName = function(ticker, exchange, type, onResultReadyCallback) {
@@ -197,16 +199,16 @@ Datafeeds.UDFCompatibleDatafeed.prototype.searchSymbolsByName = function(ticker,
 				}
 
 				if (typeof data.s == "undefined" || data.s != "error") {
-					onResultReadyCallback(data)
+					onResultReadyCallback(data);
 				}
 				else {
 					onResultReadyCallback([]);
 				}
 
 			})
-			.error(function(reason) {
+			.fail(function(reason) {
 				onResultReadyCallback([]);
-			})
+			});
 	}
 	else {
 
@@ -233,7 +235,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.searchSymbolsByName = function(ticker,
 			});
 		}
 	}
-}
+};
 
 
 Datafeeds.UDFCompatibleDatafeed.prototype._symbolResolveURL = "/symbols";
@@ -271,12 +273,12 @@ Datafeeds.UDFCompatibleDatafeed.prototype.resolveSymbol = function(symbolName, o
 					onResolveErrorCallback("unknown_symbol");
 				}
 				else {
-					onResultReady(data)
+					onResultReady(data);
 				}
 			})
-			.error(function(reason) {
+			.fail(function(reason) {
 				onResolveErrorCallback("unknown_symbol");
-			})
+			});
 	}
 	else {
 		if (this._initializationFinished) {
@@ -288,7 +290,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.resolveSymbol = function(symbolName, o
 			});
 		}
 	}
-}
+};
 
 
 Datafeeds.UDFCompatibleDatafeed.prototype._historyURL = "/history";
@@ -348,32 +350,33 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolut
 			bars.push(barValue);
 		}
 
-		if (bars.length == 0) {
+
+		if (bars.length === 0) {
 			onErrorCallback("no data");
 		}
-		else {
-			onDataCallback(bars);
-		}
+		
+		onDataCallback(bars);
+	})
+	.fail(function (arg) {
+		console.warn("getBars(): HTTP error " + JSON.stringify(arg));
 
-	}).
-	error(function (arg) {
 		if (!!onErrorCallback) {
-			onErrorCallback("network error: " + arg);
+			onErrorCallback("network error: " + JSON.stringify(arg));
 		}
 	});
-}
+};
 
 
 Datafeeds.UDFCompatibleDatafeed.prototype.subscribeBars = function(symbolInfo, resolution, onRealtimeCallback, listenerGUID) {
 	this._barsPulseUpdater.subscribeDataListener(symbolInfo, resolution, onRealtimeCallback, listenerGUID);
-}
+};
 
 Datafeeds.UDFCompatibleDatafeed.prototype.unsubscribeBars = function(listenerGUID) {
 	this._barsPulseUpdater.unsubscribeDataListener(listenerGUID);
-}
+};
 
 Datafeeds.UDFCompatibleDatafeed.prototype.calculateHistoryDepth = function(period, resolutionBack, intervalBack) {
-}
+};
 
 Datafeeds.UDFCompatibleDatafeed.prototype.getQuotes = function(symbols, onDataCallback, onErrorCallback) {
 	this._send(this._datafeedURL + "/quotes", { symbols: symbols })
@@ -386,7 +389,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getQuotes = function(symbols, onDataCa
 				onErrorCallback && onErrorCallback(data.errmsg);
 			}
 		})
-		.error(function (arg) {
+		.fail(function (arg) {
 			onErrorCallback && onErrorCallback("network error: " + arg);
 		});
 };
@@ -419,8 +422,7 @@ Datafeeds.SymbolsStorage = function(datafeed) {
 	this._symbolsList = [];
 
 	this._requestFullSymbolsList();
-}
-
+};
 
 
 
@@ -450,7 +452,7 @@ Datafeeds.SymbolsStorage.prototype._requestFullSymbolsList = function() {
 					that._onAnyExchangeResponseReceived(exchange);
 				}
 			}(exchange))
-			.error(function(exchange) {
+			.fail(function(exchange) {
 				return function (reason) {
 					that._onAnyExchangeResponseReceived(exchange);
 				};
@@ -518,21 +520,21 @@ Datafeeds.SymbolsStorage.prototype._onExchangeDataReceived = function(exchangeNa
 	catch (error) {
 		throw "API error when processing exchange `" + exchangeName + "` symbol #" + symbolIndex + ": " + error;
 	}
-}
+};
 
 
 Datafeeds.SymbolsStorage.prototype._onAnyExchangeResponseReceived = function(exchangeName) {
 
 	delete this._exchangesWaitingForData[exchangeName];
 
-	var allDataReady = Object.keys(this._exchangesWaitingForData).length == 0;
+	var allDataReady = Object.keys(this._exchangesWaitingForData).length === 0;
 
 	if (allDataReady) {
 		this._symbolsList.sort();
 		this._datafeed._logMessage("All exchanges data ready");
 		this._datafeed.onInitialized();
 	}
-}
+};
 
 
 //	BEWARE: this function does not consider symbol's exchange
@@ -543,9 +545,9 @@ Datafeeds.SymbolsStorage.prototype.resolveSymbol = function(symbolName, onSymbol
 	}
 	else {
 		onSymbolResolvedCallback(this._symbolsInfo[symbolName]);
-	};
+	}
 
-}
+};
 
 
 //	==================================================================================================================================================
@@ -560,7 +562,7 @@ Datafeeds.SymbolsStorage.prototype.resolveSymbol = function(symbolName, onSymbol
 
 Datafeeds.SymbolSearchComponent = function(datafeed) {
 	this._datafeed = datafeed;
-}
+};
 
 
 
@@ -574,7 +576,7 @@ Datafeeds.SymbolSearchComponent.prototype.searchSymbolsByName = function(searchA
 	var symbolsStorage = this._datafeed._symbolsStorage;
 
 	var results = [];
-	var queryIsEmpty = !searchArgument.ticker || searchArgument.ticker.length == 0;
+	var queryIsEmpty = !searchArgument.ticker || searchArgument.ticker.length === 0;
 
 	for (var i = 0; i < symbolsStorage._symbolsList.length; ++i) {
 		var symbolName = symbolsStorage._symbolsList[i];
@@ -586,7 +588,7 @@ Datafeeds.SymbolSearchComponent.prototype.searchSymbolsByName = function(searchA
 		if (searchArgument.exchange && searchArgument.exchange.length > 0 && item.exchange != searchArgument.exchange) {
 			continue;
 		}
-		if (queryIsEmpty || item.name.indexOf(searchArgument.ticker) == 0) {
+		if (queryIsEmpty || item.name.indexOf(searchArgument.ticker) === 0) {
 			results.push({
 				symbol: item.name,
 				full_name: item.full_name,
@@ -648,6 +650,9 @@ Datafeeds.DataPulseUpdater = function(datafeed, updateFrequency) {
 						return;
 					}
 
+					if (bars.length === 0) {
+						return;
+					}
 					var lastBar = bars[bars.length - 1];
 					if (!isNaN(_subscriptionRecord.lastBarTime) && lastBar.time < _subscriptionRecord.lastBarTime) {
 						return;
