@@ -16,15 +16,24 @@ Datafeeds.UDFCompatibleDatafeed = function(datafeedURL, updateFrequency) {
 
 	this._symbolSearch = null;
 	this._symbolsStorage = null;
-	this._pulseUpdater = new Datafeeds.PulseUpdater(this, updateFrequency);
+	this._barsPulseUpdater = new Datafeeds.DataPulseUpdater(this, updateFrequency || 10 * 1000);
+	this._quotesPulseUpdater = new Datafeeds.QuotesPulseUpdater(this);
 
 	this._enableLogging = false;
 	this._initializationFinished = false;
 	this._callbacks = {};
 
 	this._initialize();
-}
+};
 
+Datafeeds.UDFCompatibleDatafeed.prototype.defaultConfiguration = function() {
+	return {
+		supports_search: false,
+		supports_group_request: true,
+		supported_resolutions: ["1", "5", "15", "30", "60", "1D", "1W", "1M"],
+		supports_marks: false
+	};
+};
 
 Datafeeds.UDFCompatibleDatafeed.prototype.on = function (event, callback) {
 
@@ -34,7 +43,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.on = function (event, callback) {
 
 	this._callbacks[event].push(callback);
 	return this;
-}
+};
 
 
 Datafeeds.UDFCompatibleDatafeed.prototype._fireEvent = function(event, argument) {
@@ -45,20 +54,21 @@ Datafeeds.UDFCompatibleDatafeed.prototype._fireEvent = function(event, argument)
 		}
 		this._callbacks[event] = [];
 	}
-}
+};
 
 Datafeeds.UDFCompatibleDatafeed.prototype.onInitialized = function() {
 	this._initializationFinished = true;
 	this._fireEvent("initialized");
-}
+};
 
 
 
 Datafeeds.UDFCompatibleDatafeed.prototype._logMessage = function(message) {
 	if (this._enableLogging) {
-		console.log(message);
+		var now = new Date();
+		console.log(now.toLocaleTimeString() + "." + now.getMilliseconds() + "> " + message);
 	}
-}
+};
 
 
 Datafeeds.UDFCompatibleDatafeed.prototype._send = function(url, params) {
@@ -67,13 +77,14 @@ Datafeeds.UDFCompatibleDatafeed.prototype._send = function(url, params) {
 		for (var i = 0; i < Object.keys(params).length; ++i) {
 			var key = Object.keys(params)[i];
 			var value = encodeURIComponent(params[key]);
-			request += (i == 0 ? "?" : "&") + key + "=" + value;
+			request += (i === 0 ? "?" : "&") + key + "=" + value;
 		}
 	}
 
 	this._logMessage("New request: " + request);
+
 	return $.ajax(request);
-}
+};
 
 Datafeeds.UDFCompatibleDatafeed.prototype._initialize = function() {
 
@@ -84,15 +95,10 @@ Datafeeds.UDFCompatibleDatafeed.prototype._initialize = function() {
 			var configurationData = JSON.parse(response);
 			that._setupWithConfiguration(configurationData);
 		})
-		.error(function(reason) {
-			that._setupWithConfiguration({
-				supports_search: false,
-				supports_group_request: true,
-				supported_resolutions: [1, 5, 15, 30, 60, "1D", "1W", "1M"],
-				supports_marks: false
-			});
+		.fail(function(reason) {
+			that._setupWithConfiguration(that.defaultConfiguration());
 		});
-}
+};
 
 
 Datafeeds.UDFCompatibleDatafeed.prototype.setup = function(studyEngineOptions, callback) {
@@ -106,9 +112,9 @@ Datafeeds.UDFCompatibleDatafeed.prototype.setup = function(studyEngineOptions, c
 		this.on("configuration_ready", function() {
 			that._configuration.engine = studyEngineOptions;
 			callback(that._configuration);
-		})
+		});
 	}
-}
+};
 
 Datafeeds.UDFCompatibleDatafeed.prototype._setupWithConfiguration = function(configurationData) {
 	this._configuration = configurationData;
@@ -117,19 +123,23 @@ Datafeeds.UDFCompatibleDatafeed.prototype._setupWithConfiguration = function(con
 		configurationData.exchanges = [];
 	}
 
-	if (!configurationData.symbolsTypes) {
-		configurationData.symbolsTypes = [];
-	}
+	//	@obsolete; remove in 1.5
+	var supportedResolutions = configurationData.supported_resolutions || configurationData.supportedResolutions;
+	configurationData.supported_resolutions = supportedResolutions;
 
-	if (configurationData.supports_search == false && configurationData.supports_group_request == false) {
+	//	@obsolete; remove in 1.5
+	var symbolsTypes = configurationData.symbols_types || configurationData.symbolsTypes;
+	configurationData.symbols_types = symbolsTypes;
+
+	if (!configurationData.supports_search && !configurationData.supports_group_request) {
 		throw "Unsupported datafeed configuration. Must either support search, or support group request";
 	}
 
-	if (configurationData.supports_search == false) {
+	if (!configurationData.supports_search) {
 		this._symbolSearch = new Datafeeds.SymbolSearchComponent(this);
 	}
 
-	if (configurationData.supports_group_request == true) {
+	if (configurationData.supports_group_request) {
 		//	this component will call onInitialized() by itself
 		this._symbolsStorage = new Datafeeds.SymbolsStorage(this);
 	}
@@ -139,7 +149,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype._setupWithConfiguration = function(con
 
 	this._fireEvent("configuration_ready");
 	this._logMessage("Initialized with " + JSON.stringify(configurationData));
-}
+};
 
 
 //	===============================================================================================================================
@@ -156,15 +166,20 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getMarks = function (symbolInfo, range
 			.done(function (response) {
 				onDataCallback(JSON.parse(response));
 			})
-			.error(function() {
+			.fail(function() {
 				onDataCallback([]);
-			})
+			});
 	}
-}
+};
 
 
 Datafeeds.UDFCompatibleDatafeed.prototype.searchSymbolsByName = function(ticker, exchange, type, onResultReadyCallback) {
 	var MAX_SEARCH_RESULTS = 30;
+
+	if (!this._configuration) {
+		onResultReadyCallback([]);
+		return;
+	}
 
 	if (this._configuration.supports_search) {
 
@@ -184,16 +199,16 @@ Datafeeds.UDFCompatibleDatafeed.prototype.searchSymbolsByName = function(ticker,
 				}
 
 				if (typeof data.s == "undefined" || data.s != "error") {
-					onResultReadyCallback(data)
+					onResultReadyCallback(data);
 				}
 				else {
 					onResultReadyCallback([]);
 				}
 
 			})
-			.error(function(reason) {
+			.fail(function(reason) {
 				onResultReadyCallback([]);
-			})
+			});
 	}
 	else {
 
@@ -220,7 +235,10 @@ Datafeeds.UDFCompatibleDatafeed.prototype.searchSymbolsByName = function(ticker,
 			});
 		}
 	}
-}
+};
+
+
+Datafeeds.UDFCompatibleDatafeed.prototype._symbolResolveURL = "/symbols";
 
 
 //	BEWARE: this function does not consider symbol's exchange
@@ -236,9 +254,17 @@ Datafeeds.UDFCompatibleDatafeed.prototype.resolveSymbol = function(symbolName, o
 		return;
 	}
 
+	function onResultReady(data) {
+		var postProcessedData = data;
+		if (that.postProcessSymbolInfo) {
+			postProcessedData = that.postProcessSymbolInfo(postProcessedData);
+		}
+		onSymbolResolvedCallback(postProcessedData);
+	}
+
 	if (!this._configuration.supports_group_request) {
-		this._send(this._datafeedURL + "/symbols", {
-				symbol: symbolName.toUpperCase()
+		this._send(this._datafeedURL + this._symbolResolveURL, {
+				symbol: symbolName ? symbolName.toUpperCase() : ""
 			})
 			.done(function (response) {
 				var data = JSON.parse(response);
@@ -247,26 +273,27 @@ Datafeeds.UDFCompatibleDatafeed.prototype.resolveSymbol = function(symbolName, o
 					onResolveErrorCallback("unknown_symbol");
 				}
 				else {
-					onSymbolResolvedCallback(data)
+					onResultReady(data);
 				}
 			})
-			.error(function(reason) {
+			.fail(function(reason) {
 				onResolveErrorCallback("unknown_symbol");
-			})
+			});
 	}
 	else {
 		if (this._initializationFinished) {
-			this._symbolsStorage.resolveSymbol(symbolName, onSymbolResolvedCallback, onResolveErrorCallback);
+			this._symbolsStorage.resolveSymbol(symbolName, onResultReady, onResolveErrorCallback);
 		}
 		else {
 			this.on("initialized", function() {
-				that._symbolsStorage.resolveSymbol(symbolName, onSymbolResolvedCallback, onResolveErrorCallback);
+				that._symbolsStorage.resolveSymbol(symbolName, onResultReady, onResolveErrorCallback);
 			});
 		}
 	}
-}
+};
 
 
+Datafeeds.UDFCompatibleDatafeed.prototype._historyURL = "/history";
 
 Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolution, rangeStartDate, rangeEndDate, onDataCallback, onErrorCallback) {
 
@@ -275,7 +302,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolut
 		throw "Got a JS time instead of Unix one.";
 	}
 
-	this._send(this._datafeedURL + "/history", {
+	this._send(this._datafeedURL + this._historyURL, {
 			symbol: symbolInfo.ticker.toUpperCase(),
 			resolution: resolution,
 			from: rangeStartDate,
@@ -323,32 +350,57 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolut
 			bars.push(barValue);
 		}
 
-		if (bars.length == 0) {
+
+		if (bars.length === 0) {
 			onErrorCallback("no data");
 		}
-		else {
-			onDataCallback(bars);
-		}
+		
+		onDataCallback(bars);
+	})
+	.fail(function (arg) {
+		console.warn("getBars(): HTTP error " + JSON.stringify(arg));
 
-	}).
-	error(function (arg) {
 		if (!!onErrorCallback) {
-			onErrorCallback("network error: " + arg);
+			onErrorCallback("network error: " + JSON.stringify(arg));
 		}
 	});
-}
+};
 
 
 Datafeeds.UDFCompatibleDatafeed.prototype.subscribeBars = function(symbolInfo, resolution, onRealtimeCallback, listenerGUID) {
-	this._pulseUpdater.subscribeDataListener(symbolInfo, resolution, onRealtimeCallback, listenerGUID);
-}
+	this._barsPulseUpdater.subscribeDataListener(symbolInfo, resolution, onRealtimeCallback, listenerGUID);
+};
 
 Datafeeds.UDFCompatibleDatafeed.prototype.unsubscribeBars = function(listenerGUID) {
-	this._pulseUpdater.unsubscribeDataListener(listenerGUID);
-}
+	this._barsPulseUpdater.unsubscribeDataListener(listenerGUID);
+};
 
 Datafeeds.UDFCompatibleDatafeed.prototype.calculateHistoryDepth = function(period, resolutionBack, intervalBack) {
-}
+};
+
+Datafeeds.UDFCompatibleDatafeed.prototype.getQuotes = function(symbols, onDataCallback, onErrorCallback) {
+	this._send(this._datafeedURL + "/quotes", { symbols: symbols })
+		.done(function (response) {
+			var data = JSON.parse(response);
+			if (data.s == "ok") {
+				//	JSON format is {s: "status", [{s: "symbol_status", n: "symbol_name", v: {"field1": "value1", "field2": "value2", ..., "fieldN": "valueN"}}]}
+				onDataCallback && onDataCallback(data.d);
+			} else {
+				onErrorCallback && onErrorCallback(data.errmsg);
+			}
+		})
+		.fail(function (arg) {
+			onErrorCallback && onErrorCallback("network error: " + arg);
+		});
+};
+
+Datafeeds.UDFCompatibleDatafeed.prototype.subscribeQuotes = function(symbols, fastSymbols, onRealtimeCallback, listenerGUID) {
+	this._quotesPulseUpdater.subscribeDataListener(symbols, fastSymbols, onRealtimeCallback, listenerGUID);
+};
+
+Datafeeds.UDFCompatibleDatafeed.prototype.unsubscribeQuotes = function(listenerGUID) {
+	this._quotesPulseUpdater.unsubscribeDataListener(listenerGUID);
+};
 
 //	==================================================================================================================================================
 //	==================================================================================================================================================
@@ -370,8 +422,7 @@ Datafeeds.SymbolsStorage = function(datafeed) {
 	this._symbolsList = [];
 
 	this._requestFullSymbolsList();
-}
-
+};
 
 
 
@@ -401,7 +452,7 @@ Datafeeds.SymbolsStorage.prototype._requestFullSymbolsList = function() {
 					that._onAnyExchangeResponseReceived(exchange);
 				}
 			}(exchange))
-			.error(function(exchange) {
+			.fail(function(exchange) {
 				return function (reason) {
 					that._onAnyExchangeResponseReceived(exchange);
 				};
@@ -435,7 +486,7 @@ Datafeeds.SymbolsStorage.prototype._onExchangeDataReceived = function(exchangeNa
 
 			var tickerPresent = typeof data["ticker"] != "undefined";
 
-			this._symbolsInfo[fullName] = {
+			var symbolInfo = {
 				name: symbolName,
 				base_name: [listedExchange + ":" + symbolName],
 				description: tableField(data, "description", symbolIndex),
@@ -451,31 +502,39 @@ Datafeeds.SymbolsStorage.prototype._onExchangeDataReceived = function(exchangeNa
 				type: tableField(data, "type", symbolIndex),
 				session: tableField(data, "session-regular", symbolIndex),
 				ticker: tickerPresent ? tableField(data, "ticker", symbolIndex) : symbolName,
-				timezone: tableField(data, "timezone", symbolIndex)
+				timezone: tableField(data, "timezone", symbolIndex),
+				supported_resolutions: tableField(data, "supported-resolutions", symbolIndex) || this._datafeed.defaultConfiguration().supported_resolutions,
+				force_session_rebuild: tableField(data, "force-session-rebuild", symbolIndex) || false,
+				has_daily: tableField(data, "has-daily", symbolIndex) || true,
+				intraday_multipliers: tableField(data, "intraday-multipliers", symbolIndex) || ["1", "5", "15", "30", "60"],
+				has_fractional_volume: tableField(data, "has-fractional-volume", symbolIndex) || false,
+				has_weekly_and_monthly: tableField(data, "has-weekly-and-monthly", symbolIndex) || false,
+				has_empty_bars: tableField(data, "has-empty-bars", symbolIndex) || false,
+				volume_precision: tableField(data, "volume-precision", symbolIndex) || 0
 			};
 
-			this._symbolsInfo[symbolName] = this._symbolsInfo[fullName];
+			this._symbolsInfo[symbolInfo.ticker] = this._symbolsInfo[symbolName] = this._symbolsInfo[fullName] = symbolInfo;
 			this._symbolsList.push(symbolName);
 		}
 	}
 	catch (error) {
 		throw "API error when processing exchange `" + exchangeName + "` symbol #" + symbolIndex + ": " + error;
 	}
-}
+};
 
 
 Datafeeds.SymbolsStorage.prototype._onAnyExchangeResponseReceived = function(exchangeName) {
 
 	delete this._exchangesWaitingForData[exchangeName];
 
-	var allDataReady = Object.keys(this._exchangesWaitingForData).length == 0;
+	var allDataReady = Object.keys(this._exchangesWaitingForData).length === 0;
 
 	if (allDataReady) {
 		this._symbolsList.sort();
 		this._datafeed._logMessage("All exchanges data ready");
 		this._datafeed.onInitialized();
 	}
-}
+};
 
 
 //	BEWARE: this function does not consider symbol's exchange
@@ -486,9 +545,9 @@ Datafeeds.SymbolsStorage.prototype.resolveSymbol = function(symbolName, onSymbol
 	}
 	else {
 		onSymbolResolvedCallback(this._symbolsInfo[symbolName]);
-	};
+	}
 
-}
+};
 
 
 //	==================================================================================================================================================
@@ -503,7 +562,7 @@ Datafeeds.SymbolsStorage.prototype.resolveSymbol = function(symbolName, onSymbol
 
 Datafeeds.SymbolSearchComponent = function(datafeed) {
 	this._datafeed = datafeed;
-}
+};
 
 
 
@@ -517,7 +576,7 @@ Datafeeds.SymbolSearchComponent.prototype.searchSymbolsByName = function(searchA
 	var symbolsStorage = this._datafeed._symbolsStorage;
 
 	var results = [];
-	var queryIsEmpty = !searchArgument.ticker || searchArgument.ticker.length == 0;
+	var queryIsEmpty = !searchArgument.ticker || searchArgument.ticker.length === 0;
 
 	for (var i = 0; i < symbolsStorage._symbolsList.length; ++i) {
 		var symbolName = symbolsStorage._symbolsList[i];
@@ -529,14 +588,15 @@ Datafeeds.SymbolSearchComponent.prototype.searchSymbolsByName = function(searchA
 		if (searchArgument.exchange && searchArgument.exchange.length > 0 && item.exchange != searchArgument.exchange) {
 			continue;
 		}
-		if (queryIsEmpty || item.name.indexOf(searchArgument.ticker) == 0) {
+		if (queryIsEmpty || item.name.indexOf(searchArgument.ticker) === 0) {
 			results.push({
 				symbol: item.name,
 				full_name: item.full_name,
 				description: item.description,
 				exchange: item.exchange,
 				params: [],
-				type: item.type
+				type: item.type,
+				ticker: item.name
 			});
 		}
 
@@ -555,15 +615,13 @@ Datafeeds.SymbolSearchComponent.prototype.searchSymbolsByName = function(searchA
 //	==================================================================================================================================================
 
 /*
-	It's a pulse updating component for ExternalDatafeed. It emulates realtime updates with periodic requests.
+	This is a pulse updating components for ExternalDatafeed. They emulates realtime updates with periodic requests.
 */
 
-Datafeeds.PulseUpdater = function(datafeed, updateFrequency) {
+Datafeeds.DataPulseUpdater = function(datafeed, updateFrequency) {
 	this._datafeed = datafeed;
 	this._subscribers = {};
 
-
-	this._lastBarTime = 0;
 	this._requestsPending = 0;
 	var that = this;
 
@@ -592,12 +650,18 @@ Datafeeds.PulseUpdater = function(datafeed, updateFrequency) {
 						return;
 					}
 
+					if (bars.length === 0) {
+						return;
+					}
 					var lastBar = bars[bars.length - 1];
 					if (!isNaN(_subscriptionRecord.lastBarTime) && lastBar.time < _subscriptionRecord.lastBarTime) {
 						return;
 					}
 
 					var subscribers = _subscriptionRecord.listeners;
+
+					//	BEWARE: this one isn't working when first update comes and this update makes a new bar. In this case
+					//	_subscriptionRecord.lastBarTime = NaN
 					var isNewBar = !isNaN(_subscriptionRecord.lastBarTime) && lastBar.time > _subscriptionRecord.lastBarTime;
 
 					//	Pulse updating may miss some trades data (ie, if pulse period = 10 secods and new bar is started 5 seconds later after the last update, the
@@ -630,19 +694,19 @@ Datafeeds.PulseUpdater = function(datafeed, updateFrequency) {
 		}
 	}
 
-	if (updateFrequency && updateFrequency > 0) {
+	if (typeof updateFrequency != "undefined" && updateFrequency > 0) {
 		setInterval(update, updateFrequency);
 	}
 }
 
 
-Datafeeds.PulseUpdater.prototype.unsubscribeDataListener = function(listenerGUID) {
+Datafeeds.DataPulseUpdater.prototype.unsubscribeDataListener = function(listenerGUID) {
 	this._datafeed._logMessage("Unsubscribing " + listenerGUID);
 	delete this._subscribers[listenerGUID];
 }
 
 
-Datafeeds.PulseUpdater.prototype.subscribeDataListener = function(symbolInfo, resolution, newDataCallback, listenerGUID) {
+Datafeeds.DataPulseUpdater.prototype.subscribeDataListener = function(symbolInfo, resolution, newDataCallback, listenerGUID) {
 
 	this._datafeed._logMessage("Subscribing " + listenerGUID);
 
@@ -662,7 +726,7 @@ Datafeeds.PulseUpdater.prototype.subscribeDataListener = function(symbolInfo, re
 }
 
 
-Datafeeds.PulseUpdater.prototype.periodLengthSeconds = function(resolution, requiredPeriodsCount) {
+Datafeeds.DataPulseUpdater.prototype.periodLengthSeconds = function(resolution, requiredPeriodsCount) {
 	var daysCount = 0;
 
 	if (resolution == "D") {
@@ -680,3 +744,70 @@ Datafeeds.PulseUpdater.prototype.periodLengthSeconds = function(resolution, requ
 
 	return daysCount * 24 * 60 * 60;
 }
+
+
+Datafeeds.QuotesPulseUpdater = function(datafeed) {
+	this._datafeed = datafeed;
+	this._subscribers = {};
+	this._updateInterval = 60 * 1000;
+	this._fastUpdateInterval = 10 * 1000;
+	this._requestsPending = 0;
+
+	var that = this;
+
+	setInterval(function() {
+		that._updateQuotes(function(subscriptionRecord) { return subscriptionRecord.symbols; })
+	}, this._updateInterval);
+
+	setInterval(function() {
+		that._updateQuotes(function(subscriptionRecord) { return subscriptionRecord.fastSymbols.length > 0 ? subscriptionRecord.fastSymbols : subscriptionRecord.symbols; })
+	}, this._fastUpdateInterval);
+};
+
+Datafeeds.QuotesPulseUpdater.prototype.subscribeDataListener = function(symbols, fastSymbols, newDataCallback, listenerGUID) {
+	if (!this._subscribers.hasOwnProperty(listenerGUID)) {
+		this._subscribers[listenerGUID] = {
+			symbols: symbols,
+			fastSymbols: fastSymbols,
+			listeners: []
+		};
+	}
+	this._subscribers[listenerGUID].listeners.push(newDataCallback);
+};
+
+Datafeeds.QuotesPulseUpdater.prototype.unsubscribeDataListener = function(listenerGUID) {
+	delete this._subscribers[listenerGUID];
+};
+
+Datafeeds.QuotesPulseUpdater.prototype._updateQuotes = function(symbolsGetter) {
+	if (this._requestsPending > 0) {
+		return;
+	}
+
+	var that = this;
+	for (var listenerGUID in this._subscribers) {
+		this._requestsPending++;
+
+		var subscriptionRecord = this._subscribers[listenerGUID];
+		this._datafeed.getQuotes(symbolsGetter(subscriptionRecord),
+			// onDataCallback
+			function(subscribers, guid) {
+				return function(data) {
+					that._requestsPending--;
+
+					// means the subscription was cancelled while waiting for data
+					if (!that._subscribers.hasOwnProperty(guid)) {
+						return;
+					}
+
+					for (var i =0; i < subscribers.length; ++i) {
+						subscribers[i](data);
+					}
+				}
+			}(subscriptionRecord.listeners, listenerGUID),
+			// onErrorCallback
+			function (error) {
+				that._requestsPending--;
+			});
+	}
+};

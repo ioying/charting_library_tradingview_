@@ -27,9 +27,13 @@
 					//	Regression Trend-related functionality is not implemented yet, so it's hidden for a while
 					drawings_access: { type: 'black', tools: [ { name: "Regression Trend" } ] },
 					disabled_features: ["use_localstorage_for_settings"],
-					charts_storage_url: 'http://saveload.tradingview.com',
-					client_id: 'tradingview.com',
-					user_id: 'public_user_id'
+					preset: "mobile",
+					overrides: {
+						"paneProperties.background": "#222222",
+						"paneProperties.gridProperties.color": "#454545",
+						"symbolWatermarkProperties.transparency": 90,
+						"scalesProperties.textColor" : "#AAA"
+					}
 				});
 			})
 

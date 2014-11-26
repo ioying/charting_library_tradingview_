@@ -7,6 +7,8 @@
 //		<property_path>: <default Charting Library value>
 //
 
+	//	fonts available in text editors (i.e., in `Text` drawing tool properties dialog)
+	editorFontsList: ['Verdana', 'Courier New', 'Times New Roman', 'Arial']
 
 	paneProperties.background: "#ffffff"
 	paneProperties.gridProperties.color: "#E6E6E6"
