@@ -5,4 +5,4 @@ This repository contains Charting Library package & bugtracker. You may find the
 
 If you use Git in your project, please feel free to this repo as a submodule to your one.
 
-**1.0 stable** Looking for the most recent features ? Check out **dev** branch
+**1.1 stable** Looking for the most recent features ? Check out **dev** branch
