@@ -101,16 +101,14 @@ Datafeeds.UDFCompatibleDatafeed.prototype._initialize = function() {
 };
 
 
-Datafeeds.UDFCompatibleDatafeed.prototype.setup = function(studyEngineOptions, callback) {
+Datafeeds.UDFCompatibleDatafeed.prototype.onReady = function(callback) {
 
 	if (this._configuration) {
-		this._configuration.engine = studyEngineOptions;
 		callback(this._configuration);
 	}
 	else {
 		var that = this;
 		this.on("configuration_ready", function() {
-			that._configuration.engine = studyEngineOptions;
 			callback(that._configuration);
 		});
 	}
@@ -351,11 +349,11 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolut
 		}
 
 
+		onDataCallback(bars);
+
 		if (bars.length === 0) {
 			onErrorCallback("no data");
 		}
-		
-		onDataCallback(bars);
 	})
 	.fail(function (arg) {
 		console.warn("getBars(): HTTP error " + JSON.stringify(arg));
@@ -606,7 +604,7 @@ Datafeeds.SymbolSearchComponent.prototype.searchSymbolsByName = function(searchA
 	}
 
 	searchArgument.onResultReadyCallback(results);
-}
+};
 
 
 

@@ -31,6 +31,7 @@
 					charts_storage_url: 'http://saveload.tradingview.com',
 					client_id: 'tradingview.com',
 					user_id: 'public_user_id'
+
 				});
 
 				widget.onChartReady(function() {
@@ -41,16 +42,16 @@
 						})
 						.setText("PROFIT: 71.1 (3.31%)")
 						.setQuantity("8.235")
-                        .setLineLength(3);
-                    position.setPrice(position.getPrice() - 2);
+						.setLineLength(3);
+					position.setPrice(position.getPrice() - 2);
 
 					var order = widget.createOrderLine()
 						.onCancel(function(text) {
 						})
 						.setText("STOP: 73.5 (5,64%)")
-                        .setLineLength(3)
+						.setLineLength(3)
 						.setQuantity("2");
-                    order.setPrice(order.getPrice() - 2.5);
+					order.setPrice(order.getPrice() - 2.5);
 
 					widget.createExecutionShape()
 						.setText("@1,320.75 Limit Buy 1")
@@ -58,10 +59,10 @@
 						.setArrowSpacing(25)
 						.setArrowHeight(25)
 						.setArrowColor("#F00")
-						.setTime(new Date().valueOf())
+						.setTime(new Date("3 Dec 2014 00:00:00 GMT+0").valueOf() / 1000)
 						.setPrice(15.5);
 				});
-			})
+			});
 
 		</script>
 

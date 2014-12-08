@@ -33,10 +33,12 @@
 					//	Regression Trend-related functionality is not implemented yet, so it's hidden for a while
 					drawings_access: { type: 'black', tools: [ { name: "Regression Trend" } ] },
 					indicators_file_name: 'http://e12:9090/indicators.js',
-					disabled_features: ["use_localstorage_for_settings"],
+					disabled_features: ["use_localstorage_for_settings", "volume_force_overlay"],
+					enabled_features: ["move_logo_to_main_pane"],
 					overrides: {
 						"mainSeriesProperties.style": 0,
-						"symbolWatermarkProperties.color" : "#644"
+						"symbolWatermarkProperties.color" : "#944",
+						"volumePaneSize": "tiny"
 					},
 					studies_overrides: {
 						"volume.volume.color.0": "#00FFFF",
@@ -66,6 +68,13 @@
 					charts_storage_url: 'http://saveload.tradingview.com',
 					client_id: 'tradingview.com',
 					user_id: 'public_user_id'
+					favorites: {
+						intervals: ["1D", "3D", "3W", "W", "M"],
+						chartTypes: ["Area", "Line"]
+					},
+					logo: {
+						image: "http://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/ApertureLabs_logo.svg/200px-ApertureLabs_logo.svg.png"
+					}
 				});
 
 				var savedWidgetContent = null;
@@ -75,11 +84,11 @@
 					widget.onContextMenu(function(time, price) {
 						return [{
 							position: "top",
-							text: new Date(time * 1000) + "; " + price,
+							text: new Date(time * 1000).toUTCString() + "; " + price.toFixed(4),
 							click: function() {
-								alert(1);
+								console.log("Custom context menu item clicked");
 							}
-						}]
+						}];
 					});
 
 					widget.createButton()
@@ -116,20 +125,6 @@
 						.append($('<span>load reference 2</span>'));
 
 					widget.createButton()
-						.attr('title', "russian")
-						.on('click', function (e) {
-							widget.setLanguage('ru');
-						 })
-						.append($('<span>ru</span>'));
-
-					widget.createButton()
-						.attr('title', "english")
-						.on('click', function (e) {
-							widget.setLanguage('en');
-						 })
-						.append($('<span>en</span>'));
-
-					widget.createButton()
 						.attr('title', "english")
 						.on('click', function (e) {
 							widget.setSymbol("F", '2D');
@@ -154,6 +149,18 @@
 						 })
 						.append($('<span>new order</span>'));
 
+					widget.createButton()
+						.on('click', function (e) {
+							widget.removeAllStudies();
+						 })
+						.append($('<span>rm all studies</span>'));
+
+					widget.createButton()
+						.on('click', function (e) {
+							widget.removeAllShapes();
+						 })
+						.append($('<span>rm all shapes</span>'));
+
 					widget.onGrayedObjectClicked(function(x) {
 						alert("You are not permitted to use " + x.name + "(" + x.type + ")");
 					});
@@ -161,8 +168,41 @@
 					widget.onIntervalChange(function(x) {
 						console.log("onIntervalChange: " + x);
 					});
+
+					var position = widget.createPositionLine()
+						.onReverse(function(text) {
+							console.log("Position reverse event");
+						})
+						.onClose(function(text) {
+							console.log("Position close event");
+						})
+						.setText("PROFIT: 71.1 (3.31%)")
+						.setQuantity("8.235")
+						.setLineLength(3);
+					position.setPrice(position.getPrice() - 2);
+
+					var order = widget.createOrderLine()
+						.onMove(function() {
+							console.log("Order moved event");
+						})
+						.onCancel(function(text) {
+							console.log("Order cancel event");
+						})
+						.setText("STOP: 73.5 (5,64%)")
+						.setLineLength(3)
+						.setQuantity("2");
+					order.setPrice(order.getPrice() - 2.5);
+
+					widget.createExecutionShape()
+						.setText("@1,320.75 Limit Buy 1")
+						.setTextColor("rgba(255,0,0,0.5)")
+						.setArrowSpacing(25)
+						.setArrowHeight(25)
+						.setArrowColor("#F00")
+						.setTime(new Date("4 Dec 2014 00:00:00 GMT+0").valueOf() / 1000)
+						.setPrice(15.5);
 				});
-			})
+			});
 
 		</script>
 

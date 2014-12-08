@@ -7,6 +7,9 @@
 //		<property_path>: <default Charting Library value>
 //
 
+	//	supported values: large, medium, small, tiny
+	volumePaneSize: "large"
+
 	//	fonts available in text editors (i.e., in `Text` drawing tool properties dialog)
 	editorFontsList: ['Verdana', 'Courier New', 'Times New Roman', 'Arial']
 
