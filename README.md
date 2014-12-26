@@ -1,8 +1,10 @@
-TV Charting Library
-================
+#TradingView Charting Library
 
-This repository contains Charting Library package & bugtracker. You may find the documentation [on Google Drive](https://docs.google.com/document/d/1rAigRhQUSLgLCzUAiVBJGAB7uchb-PzFVe0Bl8WTtF0/edit).
 
-If you use Git in your project, please feel free to this repo as a submodule to your one.
+This repository contains Charting Library package. If you use Git in your project, please feel free to this repo as a submodule to your one. `master` branch contains current stable version. `dev` branch contains the most recent features and fixes, but it's less stable.
 
-**1.1 stable** Looking for the most recent features ? Check out **dev** branch
+###Documentation
+See our docs @ this repository's [wiki](https://github.com/tradingview/charting_library/wiki). Please read it (at least, [Overview](https://github.com/tradingview/charting_library/wiki) and [Best Practices](https://github.com/tradingview/charting_library/wiki/Best-practices)) before running the Library.
+
+###Issues Tracking
+We use GitHub [Issues tracker](https://github.com/tradingview/charting_library/issues) for our project. Feel free to create bug reports and features requests. Please try reading the doc before asking questions because we will have more time for development then. 
