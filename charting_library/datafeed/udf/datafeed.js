@@ -495,6 +495,8 @@ Datafeeds.SymbolsStorage.prototype._onExchangeDataReceived = function(exchangeNa
 				listed_exchange: listedExchange,
 				exchange: tradedExchange,
 				minmov: tableField(data, "minmovement", symbolIndex) || tableField(data, "minmov", symbolIndex) ,
+				minmove2: tableField(data, "minmove2", symbolIndex) || tableField(data, "minmov2", symbolIndex) ,
+				fractional: tableField(data, "fractional", symbolIndex),
 				pointvalue: tableField(data, "pointvalue", symbolIndex),
 				pricescale: tableField(data, "pricescale", symbolIndex),
 				type: tableField(data, "type", symbolIndex),
