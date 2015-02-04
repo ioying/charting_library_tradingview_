@@ -633,7 +633,8 @@ Datafeeds.DataPulseUpdater = function(datafeed, updateFrequency) {
 		for (var listenerGUID in that._subscribers) {
 			var subscriptionRecord = that._subscribers[listenerGUID];
 			var resolution = subscriptionRecord.resolution;
-			var datesRangeRight = Math.round(Date.now() / 1000);
+			var localNow = new Date();
+			var datesRangeRight = Math.round((localNow.valueOf() - localNow.getTimezoneOffset() * 60 * 1000) / 1000);
 
 			//	BEWARE: please note we really need 2 bars, not the only last one
 			//	see the explanation below. `10` is the `large enough` value to work around holidays
