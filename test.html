@@ -136,7 +136,9 @@
 							widget.createStudy("Bollinger Bands", false, false, [
 									10 + parseInt(Math.random() * 10),
 									3 + parseInt(Math.random() * 3)
-								]
+								], function (guid) {
+									console.log(guid);
+								}
 							);
 						 })
 						.append($('<span>+BB</span>'));
@@ -146,7 +148,9 @@
 						.on('click', function (e) {
 							widget.createStudy("Moving Average", false, false, [
 									10 + parseInt(Math.random() * 10)
-								]
+								], function (guid) {
+									console.log(guid);
+								}
 							);
 						 })
 						.append($('<span>+MA</span>'));
@@ -176,6 +180,23 @@
 					widget.onIntervalChange(function(x) {
 						console.log("onIntervalChange: " + x);
 					});
+
+					widget.createButton()
+						.on('click', function (e) {
+							widget.setVisibleRange({
+								from: Date.UTC(2012, 2, 3) / 1000,
+								to: Date.UTC(2013, 3, 3) / 1000
+							});
+						 })
+						.append($('<span>set view</span>'));
+
+					widget.createButton()
+						.on('click', function (e) {
+							widget.getVisibleRange(function(range) {
+								console.log(range);
+							});
+						})
+						.append($('<span>get range</span>'));
 
 					var position = widget.createPositionLine()
 						.onReverse(function(text) {
