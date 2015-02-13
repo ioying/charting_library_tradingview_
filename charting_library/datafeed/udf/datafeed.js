@@ -83,7 +83,11 @@ Datafeeds.UDFCompatibleDatafeed.prototype._send = function(url, params) {
 
 	this._logMessage("New request: " + request);
 
-	return $.ajax(request);
+	return $.ajax({
+		type: 'GET',
+		url: request,
+		contentType: 'text/plain'
+	});
 };
 
 Datafeeds.UDFCompatibleDatafeed.prototype._initialize = function() {
@@ -356,7 +360,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolut
 		}
 	})
 	.fail(function (arg) {
-		console.warn("getBars(): HTTP error " + JSON.stringify(arg));
+		console.warn(["getBars(): HTTP error", arg]);
 
 		if (!!onErrorCallback) {
 			onErrorCallback("network error: " + JSON.stringify(arg));
