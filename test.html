@@ -47,6 +47,7 @@
 						"volume.volume.transparency": 70,
 						"volume.volume ma.color": "#FF0000",
 						"volume.volume ma.transparency": 30,
+						"volume.volume.transparency": 70,
 						"volume.volume ma.linewidth": 5,
 						"volume.show ma": true,
 						"bollinger bands.median.color": "#33FF88",
@@ -156,6 +157,19 @@
 							);
 						 })
 						.append($('<span>+MA</span>'));
+
+						widget.createButton()
+						.attr('title', "Add item")
+						.on('click', function (e) {
+							widget.createStudy("Moving Average", false, false, [
+									10 + parseInt(Math.random() * 10)
+								], function (guid) {
+									console.log(guid);
+								},
+								{"plot.color.0" : "#FF0000"}
+							);
+						 })
+						.append($('<span>+MA++</span>'));
 
 					widget.createButton()
 						.on('click', function (e) {
