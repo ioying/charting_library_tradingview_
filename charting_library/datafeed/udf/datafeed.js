@@ -1,9 +1,8 @@
 /*
 	This class implements interaction with UDF-compatible datafeed.
-	Please remember this class is a separate component and may interact to other code through Datafeeds.DatafeedInterface interface functions ONLY
 
 	See UDF protocol reference at
-	https://docs.google.com/document/d/1rAigRhQUSLgLCzUAiVBJGAB7uchb-PzFVe0Bl8WTtF0
+	https://github.com/tradingview/charting_library/wiki/UDF
 */
 
 Datafeeds = {};

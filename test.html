@@ -126,11 +126,17 @@
 						.append($('<span>load reference 2</span>'));
 
 					widget.createButton()
-						.attr('title', "english")
 						.on('click', function (e) {
 							widget.setSymbol("F", '2D');
 						 })
 						.append($('<span>F, 2D</span>'));
+
+
+					widget.createButton()
+						.on('click', function (e) {
+							widget.clearMarks();
+						 })
+						.append($('<span>Clear marks</span>'));
 
 					widget.createButton()
 						.attr('title', "Add item")
@@ -145,7 +151,7 @@
 						 })
 						.append($('<span>+BB</span>'));
 
-					widget.createButton()
+					widget.createButton({align: "right"})
 						.attr('title', "Add item")
 						.on('click', function (e) {
 							widget.createStudy("Moving Average", false, false, [
@@ -157,7 +163,7 @@
 						 })
 						.append($('<span>+MA</span>'));
 
-						widget.createButton()
+						widget.createButton({align: "right"})
 						.attr('title', "Add item")
 						.on('click', function (e) {
 							widget.createStudy("Moving Average", false, false, [
@@ -169,6 +175,14 @@
 							);
 						 })
 						.append($('<span>+MA++</span>'));
+
+					widget.createButton({align: "right"})
+						.attr('title', "Add item")
+						.on('click', function (e) {
+							widget.createStudy('Stochastic', false, false, [12, 3, 3], null, {"%d.color" : "#000000", "%k.color" : "#00FF00"});
+						 })
+						.append($('<span>+Stoch</span>'));
+
 
 					widget.createButton()
 						.on('click', function (e) {
