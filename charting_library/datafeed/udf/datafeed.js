@@ -1,15 +1,13 @@
 /*
 	This class implements interaction with UDF-compatible datafeed.
-	Please remember this class is a separate component and may interact to other code through Datafeeds.DatafeedInterface interface functions ONLY
 
 	See UDF protocol reference at
-	https://docs.google.com/document/d/1rAigRhQUSLgLCzUAiVBJGAB7uchb-PzFVe0Bl8WTtF0
+	https://github.com/tradingview/charting_library/wiki/UDF
 */
 
 Datafeeds = {};
 
-
-Datafeeds.UDFCompatibleDatafeed = function(datafeedURL, updateFrequency) {
+Datafeeds.UDFCompatibleDatafeed = function(datafeedURL, updateFrequency, protocolVersion) {
 
 	this._datafeedURL = datafeedURL;
 	this._configuration = undefined;
@@ -18,6 +16,7 @@ Datafeeds.UDFCompatibleDatafeed = function(datafeedURL, updateFrequency) {
 	this._symbolsStorage = null;
 	this._barsPulseUpdater = new Datafeeds.DataPulseUpdater(this, updateFrequency || 10 * 1000);
 	this._quotesPulseUpdater = new Datafeeds.QuotesPulseUpdater(this);
+	this._protocolVersion = protocolVersion || 2;
 
 	this._enableLogging = false;
 	this._initializationFinished = false;
@@ -83,7 +82,11 @@ Datafeeds.UDFCompatibleDatafeed.prototype._send = function(url, params) {
 
 	this._logMessage("New request: " + request);
 
-	return $.ajax(request);
+	return $.ajax({
+		type: 'GET',
+		url: request,
+		contentType: 'text/plain'
+	});
 };
 
 Datafeeds.UDFCompatibleDatafeed.prototype._initialize = function() {
@@ -101,16 +104,14 @@ Datafeeds.UDFCompatibleDatafeed.prototype._initialize = function() {
 };
 
 
-Datafeeds.UDFCompatibleDatafeed.prototype.setup = function(studyEngineOptions, callback) {
+Datafeeds.UDFCompatibleDatafeed.prototype.onReady = function(callback) {
 
 	if (this._configuration) {
-		this._configuration.engine = studyEngineOptions;
 		callback(this._configuration);
 	}
 	else {
 		var that = this;
 		this.on("configuration_ready", function() {
-			that._configuration.engine = studyEngineOptions;
 			callback(that._configuration);
 		});
 	}
@@ -254,11 +255,17 @@ Datafeeds.UDFCompatibleDatafeed.prototype.resolveSymbol = function(symbolName, o
 		return;
 	}
 
+	var resolveRequestStartTime = Date.now();
+	that._logMessage("Resolve requested");
+
 	function onResultReady(data) {
 		var postProcessedData = data;
 		if (that.postProcessSymbolInfo) {
 			postProcessedData = that.postProcessSymbolInfo(postProcessedData);
 		}
+
+		that._logMessage("Symbol resolved: " + (Date.now() - resolveRequestStartTime));
+
 		onSymbolResolvedCallback(postProcessedData);
 	}
 
@@ -277,6 +284,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.resolveSymbol = function(symbolName, o
 				}
 			})
 			.fail(function(reason) {
+				that._logMessage("Error resolving symbol: " + JSON.stringify([reason]));
 				onResolveErrorCallback("unknown_symbol");
 			});
 	}
@@ -299,8 +307,12 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolut
 
 	//	timestamp sample: 1399939200
 	if (rangeStartDate > 0 && (rangeStartDate + "").length > 10) {
-		throw "Got a JS time instead of Unix one.";
+		throw ["Got a JS time instead of Unix one.", rangeStartDate, rangeEndDate];
 	}
+
+	var that = this;
+
+	var requestStartTime = Date.now();
 
 	this._send(this._datafeedURL + this._historyURL, {
 			symbol: symbolInfo.ticker.toUpperCase(),
@@ -312,7 +324,9 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolut
 
 		var data = JSON.parse(response);
 
-		if (data.s != "ok") {
+		var nodata = data.s == "no_data";
+
+		if (data.s != "ok" && !nodata) {
 			if (!!onErrorCallback) {
 				onErrorCallback(data.s);
 			}
@@ -321,8 +335,9 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolut
 
 		var bars = [];
 
-		//	data is JSON having format {s: "status", v: [volumes], t: [times], o: [opens], h: [highs], l: [lows], c:[closes]}
-		var barsCount = data.t.length;
+		//	data is JSON having format {s: "status" (ok, no_data, error),
+		//  v: [volumes], t: [times], o: [opens], h: [highs], l: [lows], c:[closes], nb: "optional_unixtime_if_no_data"}
+		var barsCount = nodata ? 0 : data.t.length;
 
 		var volumePresent = typeof data.v != "undefined";
 		var ohlPresent = typeof data.o != "undefined";
@@ -350,15 +365,10 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolut
 			bars.push(barValue);
 		}
 
-
-		if (bars.length === 0) {
-			onErrorCallback("no data");
-		}
-		
-		onDataCallback(bars);
+		onDataCallback(bars, {version: that._protocolVersion, noData: nodata, nextTime: data.nb || data.nextTime});
 	})
 	.fail(function (arg) {
-		console.warn("getBars(): HTTP error " + JSON.stringify(arg));
+		console.warn(["getBars(): HTTP error", arg]);
 
 		if (!!onErrorCallback) {
 			onErrorCallback("network error: " + JSON.stringify(arg));
@@ -497,6 +507,8 @@ Datafeeds.SymbolsStorage.prototype._onExchangeDataReceived = function(exchangeNa
 				listed_exchange: listedExchange,
 				exchange: tradedExchange,
 				minmov: tableField(data, "minmovement", symbolIndex) || tableField(data, "minmov", symbolIndex) ,
+				minmove2: tableField(data, "minmove2", symbolIndex) || tableField(data, "minmov2", symbolIndex) ,
+				fractional: tableField(data, "fractional", symbolIndex),
 				pointvalue: tableField(data, "pointvalue", symbolIndex),
 				pricescale: tableField(data, "pricescale", symbolIndex),
 				type: tableField(data, "type", symbolIndex),
@@ -606,7 +618,7 @@ Datafeeds.SymbolSearchComponent.prototype.searchSymbolsByName = function(searchA
 	}
 
 	searchArgument.onResultReadyCallback(results);
-}
+};
 
 
 
@@ -633,7 +645,8 @@ Datafeeds.DataPulseUpdater = function(datafeed, updateFrequency) {
 		for (var listenerGUID in that._subscribers) {
 			var subscriptionRecord = that._subscribers[listenerGUID];
 			var resolution = subscriptionRecord.resolution;
-			var datesRangeRight = Math.round(Date.now() / 1000);
+
+			var datesRangeRight = parseInt((new Date().valueOf()) / 1000);
 
 			//	BEWARE: please note we really need 2 bars, not the only last one
 			//	see the explanation below. `10` is the `large enough` value to work around holidays
@@ -642,7 +655,8 @@ Datafeeds.DataPulseUpdater = function(datafeed, updateFrequency) {
 			that._requestsPending++;
 
 			(function(_subscriptionRecord) {
-					that._datafeed.getBars(_subscriptionRecord.symbolInfo, resolution, datesRangeLeft, datesRangeRight, function(bars) {
+
+				that._datafeed.getBars(_subscriptionRecord.symbolInfo, resolution, datesRangeLeft, datesRangeRight, function(bars) {
 					that._requestsPending--;
 
 					//	means the subscription was cancelled while waiting for data
@@ -653,6 +667,7 @@ Datafeeds.DataPulseUpdater = function(datafeed, updateFrequency) {
 					if (bars.length === 0) {
 						return;
 					}
+
 					var lastBar = bars[bars.length - 1];
 					if (!isNaN(_subscriptionRecord.lastBarTime) && lastBar.time < _subscriptionRecord.lastBarTime) {
 						return;
