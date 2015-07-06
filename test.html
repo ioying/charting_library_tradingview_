@@ -46,7 +46,6 @@
 						"volume.volume.transparency": 70,
 						"volume.volume ma.color": "#FF0000",
 						"volume.volume ma.transparency": 30,
-						"volume.volume.transparency": 70,
 						"volume.volume ma.linewidth": 5,
 						"volume.show ma": true,
 						"bollinger bands.median.color": "#33FF88",
@@ -64,21 +63,20 @@
 						{ text: "5d", resolution: "10" },
 						{ text: "3d", resolution: "10" },
 						{ text: "2d", resolution: "5" },
-						{ text: "1d", resolution: "5" },
+						{ text: "1d", resolution: "5" }
 					],
 					charts_storage_url: 'http://saveload.tradingview.com',
+                    charts_storage_api_version: "1.1",
 					client_id: 'tradingview.com',
 					user_id: 'public_user',
 					favorites: {
 						intervals: ["1D", "3D", "3W", "W", "M"],
 						chartTypes: ["Area", "Line"]
-					},
-					logo: {
-						image: "http://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/ApertureLabs_logo.svg/200px-ApertureLabs_logo.svg.png"
 					}
 				});
 
 				var savedWidgetContent = null;
+				var savedTemplate = null;
 
 				widget.onChartReady(function() {
 
@@ -89,7 +87,10 @@
 							click: function() {
 								console.log("Custom context menu item clicked");
 							}
-						}];
+						},
+                        { text: "-", position: "top" },
+                        { text: "-Objects Tree..." }
+                        ];
 					});
 
 					widget.createButton()
@@ -124,6 +125,34 @@
 							widget.load(referenceChart2);
 						 })
 						.append($('<span>load reference 2</span>'));
+
+
+
+					widget.createButton()
+						.on('click', function (e) {
+							widget.createStudyTemplate({saveInterval: false}, function(data) {
+								savedTemplate = data;
+							});
+						 })
+						.append($('<span>save template (-i)</span>'));
+
+					widget.createButton()
+						.on('click', function (e) {
+							widget.createStudyTemplate({saveInterval: true}, function(data) {
+								savedTemplate = data;
+							});
+						 })
+						.append($('<span>save template (+i)</span>'));
+
+					widget.createButton()
+						.on('click', function (e) {
+							if (savedTemplate) {
+								widget.applyStudyTemplate(savedTemplate);
+							}
+						 })
+						.append($('<span>apply template</span>'));
+
+
 
 					widget.createButton()
 						.on('click', function (e) {
@@ -266,7 +295,7 @@
 
 	</head>
 
-	<body style="margin:0px;">
+	<body style="margin:0;">
 		<div id="tv_chart_container"></div>
 	</body>
 
