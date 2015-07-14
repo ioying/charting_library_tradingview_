@@ -1,3 +1,4 @@
+"use strict";
 /*
 	This class implements interaction with UDF-compatible datafeed.
 
@@ -5,7 +6,7 @@
 	https://github.com/tradingview/charting_library/wiki/UDF
 */
 
-Datafeeds = {};
+var Datafeeds = {};
 
 Datafeeds.UDFCompatibleDatafeed = function(datafeedURL, updateFrequency, protocolVersion) {
 
@@ -460,7 +461,7 @@ Datafeeds.SymbolsStorage.prototype._requestFullSymbolsList = function() {
 				return function(response) {
 					that._onExchangeDataReceived(exchange, JSON.parse(response));
 					that._onAnyExchangeResponseReceived(exchange);
-				}
+				};
 			}(exchange))
 			.fail(function(exchange) {
 				return function (reason) {
@@ -468,7 +469,7 @@ Datafeeds.SymbolsStorage.prototype._requestFullSymbolsList = function() {
 				};
 			}(exchange));
 	}
-}
+};
 
 
 
@@ -494,7 +495,7 @@ Datafeeds.SymbolsStorage.prototype._onExchangeDataReceived = function(exchangeNa
 
 			var hasIntraday = tableField(data, "has-intraday", symbolIndex);
 
-			var tickerPresent = typeof data["ticker"] != "undefined";
+			var tickerPresent = typeof data.ticker != "undefined";
 
 			var symbolInfo = {
 				name: symbolName,
@@ -707,18 +708,18 @@ Datafeeds.DataPulseUpdater = function(datafeed, updateFrequency) {
 			})(subscriptionRecord);
 
 		}
-	}
+	};
 
 	if (typeof updateFrequency != "undefined" && updateFrequency > 0) {
 		setInterval(update, updateFrequency);
 	}
-}
+};
 
 
 Datafeeds.DataPulseUpdater.prototype.unsubscribeDataListener = function(listenerGUID) {
 	this._datafeed._logMessage("Unsubscribing " + listenerGUID);
 	delete this._subscribers[listenerGUID];
-}
+};
 
 
 Datafeeds.DataPulseUpdater.prototype.subscribeDataListener = function(symbolInfo, resolution, newDataCallback, listenerGUID) {
@@ -738,7 +739,7 @@ Datafeeds.DataPulseUpdater.prototype.subscribeDataListener = function(symbolInfo
 	}
 
 	this._subscribers[listenerGUID].listeners.push(newDataCallback);
-}
+};
 
 
 Datafeeds.DataPulseUpdater.prototype.periodLengthSeconds = function(resolution, requiredPeriodsCount) {
@@ -758,7 +759,7 @@ Datafeeds.DataPulseUpdater.prototype.periodLengthSeconds = function(resolution, 
 	}
 
 	return daysCount * 24 * 60 * 60;
-}
+};
 
 
 Datafeeds.QuotesPulseUpdater = function(datafeed) {
@@ -771,11 +772,11 @@ Datafeeds.QuotesPulseUpdater = function(datafeed) {
 	var that = this;
 
 	setInterval(function() {
-		that._updateQuotes(function(subscriptionRecord) { return subscriptionRecord.symbols; })
+		that._updateQuotes(function(subscriptionRecord) { return subscriptionRecord.symbols; });
 	}, this._updateInterval);
 
 	setInterval(function() {
-		that._updateQuotes(function(subscriptionRecord) { return subscriptionRecord.fastSymbols.length > 0 ? subscriptionRecord.fastSymbols : subscriptionRecord.symbols; })
+		that._updateQuotes(function(subscriptionRecord) { return subscriptionRecord.fastSymbols.length > 0 ? subscriptionRecord.fastSymbols : subscriptionRecord.symbols; });
 	}, this._fastUpdateInterval);
 };
 
@@ -818,7 +819,7 @@ Datafeeds.QuotesPulseUpdater.prototype._updateQuotes = function(symbolsGetter) {
 					for (var i =0; i < subscribers.length; ++i) {
 						subscribers[i](data);
 					}
-				}
+				};
 			}(subscriptionRecord.listeners, listenerGUID),
 			// onErrorCallback
 			function (error) {
