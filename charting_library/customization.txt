@@ -1,5 +1,5 @@
 //
-//	This file contains soem chart properties description. These properties are treated
+//	This file contains some chart properties description. These properties are treated
 //	as customizable ones. Other properties customization is not supported. See the documentation for details.
 //
 //	This file format:
@@ -14,7 +14,8 @@
 	editorFontsList: ['Verdana', 'Courier New', 'Times New Roman', 'Arial']
 
 	paneProperties.background: "#ffffff"
-	paneProperties.gridProperties.color: "#E6E6E6"
+	paneProperties.vertGridProperties.color: "#E6E6E6"
+	paneProperties.horzGridProperties.color: "#E6E6E6"
 
 	//	Margins (percent). Used for auto scaling.
 	paneProperties.topMargin: 5
