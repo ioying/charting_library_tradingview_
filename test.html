@@ -40,7 +40,7 @@
                     locale: getParameterByName('lang') || "en",
 					//	Regression Trend-related functionality is not implemented yet, so it's hidden for a while
 					drawings_access: { type: 'black', tools: [ { name: "Regression Trend" } ] },
-					disabled_features: ["use_localstorage_for_settings", "volume_force_overlay"],
+					disabled_features: ["save_chart_properties_to_local_storage", "volume_force_overlay"],
 					enabled_features: ["move_logo_to_main_pane"],
 					overrides: {
 						"mainSeriesProperties.style": 0,
@@ -246,6 +246,10 @@
 						console.log("onIntervalChange: " + x);
 					});
 
+                    widget.onShortcut("alt+s", function() {
+                        widget.executeActionById("symbolSearch");
+                    });
+
 					widget.createButton()
 						.on('click', function (e) {
 							widget.setVisibleRange({
@@ -295,6 +299,46 @@
 						.setArrowColor("#F00")
 						.setTime(new Date("4 Dec 2014 00:00:00 GMT+0").valueOf() / 1000)
 						.setPrice(15.5);
+
+                    widget.createShape({
+                        time: new Date().valueOf() / 1000,
+                    }, {
+                        shape: "vertical_line"
+                    });
+
+                    widget.createShape({
+                        time: new Date().valueOf() / 1000,
+                    }, {
+                        shape: "horizontal_ray"
+                    });
+
+                    widget.createMultipointShape([
+                        { time: new Date().valueOf() / 1000 - 30 * 24 * 60 * 60, price: position.getPrice()},
+                        { time: new Date().valueOf() / 1000 - 60 * 24 * 60 * 60, price: position.getPrice() * 1.5},
+                    ], {
+                        shape: "trend_line"
+                    });
+
+                    widget.createMultipointShape([
+                        { time: new Date().valueOf() / 1000 - 60 * 24 * 60 * 60, price: position.getPrice()},
+                        { time: new Date().valueOf() / 1000 - 30 * 24 * 60 * 60, price: position.getPrice() * 1.5},
+                    ], {
+                        shape: "trend_line",
+                        lock: true,
+                        overrides: {linecolor: "#0000FF", linewidth: 2}
+                    });
+
+                    widget.createMultipointShape([
+                        { time: new Date().valueOf() / 1000 - 70 * 24 * 60 * 60, price: position.getPrice()},
+                        { time: new Date().valueOf() / 1000 - 35 * 24 * 60 * 60, price: position.getPrice() * 1.5},
+                        { time: new Date().valueOf() / 1000, price: position.getPrice()},
+                        { time: new Date().valueOf() / 1000 - 70 * 24 * 60 * 60, price: position.getPrice() * 1.3},
+                        { time: new Date().valueOf() / 1000, price: position.getPrice() * 1.3},
+
+                    ], {
+                        shape: "polyline",
+                        overrides: {linecolor: "#FF0000", linewidth: 1, backgroundColor: "#00FF00"}
+                    });
 				});
 			});
 
