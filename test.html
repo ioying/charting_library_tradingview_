@@ -26,16 +26,18 @@
                 return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
             }
 
-			TradingView.onready(function()
+            TradingView.onready(function()
 			{
+                var udf_datafeed = new Datafeeds.UDFCompatibleDatafeed("http://demo_feed.tradingview.com");
+
 				var widget = new TradingView.widget({
-					fullscreen: true,
+                    fullscreen: true,
 					symbol: 'AA',
 					interval: 'D',
 					toolbar_bg: '#f4f7f9',
 					container_id: "tv_chart_container",
 					//	BEWARE: no trailing slash is expected in feed URL
-					datafeed: new Datafeeds.UDFCompatibleDatafeed("http://demo_feed.tradingview.com"),
+					datafeed: udf_datafeed,
 					library_path: "charting_library/",
                     locale: getParameterByName('lang') || "en",
 					//	Regression Trend-related functionality is not implemented yet, so it's hidden for a while
@@ -300,47 +302,121 @@
 						.setTime(new Date("4 Dec 2014 00:00:00 GMT+0").valueOf() / 1000)
 						.setPrice(15.5);
 
-                    widget.createShape({
-                        time: new Date().valueOf() / 1000,
-                    }, {
-                        shape: "vertical_line"
-                    });
+                    var fourMonthAgo = Math.floor(new Date().valueOf() / 1000 - 4 * 30 * 24 * 60 * 60);
+                    var today = Math.floor(new Date().valueOf() / 1000);
 
-                    widget.createShape({
-                        time: new Date().valueOf() / 1000,
-                    }, {
-                        shape: "horizontal_ray"
-                    });
+                    // draw some simple technical analysis figures using drawings to show how it works
+                    getMinAndMaxPrice(udf_datafeed, fourMonthAgo, today,
+                        function(minPrice, maxPrice, minPriceTime, maxPriceTime) {
+                            widget.createMultipointShape(
+                                    [{time:fourMonthAgo, price: minPrice}, {time:today, price: minPrice}],
+                                    {
+                                        shape: "trend_line",
+                                        lock: true,
+                                        disableSelection: true,
+                                        disableSave: true,
+                                        overrides: {
+                                            showLabel: true,
+                                            fontSize: 30,
+                                            linewidth: 2,
+                                            linecolor: "#00FF00"
+                                        }
+                                    }
+                            );
+                            widget.createShape({time: Math.floor((fourMonthAgo + today) / 2), price: minPrice},
+                                    {
+                                        shape: "text",
+                                        lock: true,
+                                        disableSelection: true,
+                                        disableSave: true,
+                                        text: "3 month low at " + minPrice,
+                                        overrides: { color: "#00FF00" }
+                                    });
+                            widget.createMultipointShape(
+                                    [{time:fourMonthAgo, price: maxPrice}, {time:today, price: maxPrice}],
+                                    {
+                                        shape: "trend_line",
+                                        lock: true,
+                                        disableSelection: true,
+                                        disableSave: true,
+                                        overrides: {
+                                            showLabel: true,
+                                            fontSize: 30,
+                                            linewidth: 2,
+                                            linecolor: "#FF0000"
+                                        }
+                                    }
+                            );
+                            widget.createShape({time: Math.floor((fourMonthAgo + today) / 2), price: maxPrice},
+                                    {
+                                        shape: "text",
+                                        lock: true,
+                                        disableSelection: true,
+                                        disableSave: true,
+                                        text: "3 month high at " + maxPrice,
+                                        overrides: { color: "#FF0000" }
+                                    });
+                            widget.createMultipointShape(
+                                    [{time:maxPriceTime, price: maxPrice}, {time:minPriceTime, price: minPrice}],
+                                    {
+                                        shape: "trend_line",
+                                        lock: true,
+                                        disableSelection: true,
+                                        disableSave: true,
+                                        overrides: {
+                                            showLabel: true,
+                                            fontSize: 30,
+                                            linewidth: 2
+                                        }
+                                    }
+                            );
+                            widget.createMultipointShape(
+                                    [{time: Math.floor((maxPriceTime + minPriceTime) / 2), price: (maxPrice + minPrice) / 2},
+                                        {time: Math.floor((maxPriceTime + minPriceTime) / 2) + 5 * 24 * 60 * 60, price: (maxPrice + minPrice) / 2 * 1.1}],
+                                    {
+                                        shape: "callout",
+                                        lock: true,
+                                        disableSelection: true,
+                                        disableSave: true,
+                                        text: "Trend",
+                                        overrides: {
+                                            color: "#000000",
+                                            borderColor: "#FFFFFF",
+                                            transparency: "100",
+                                            linewidth: 1
+                                        }
+                                    }
+                            );
+                        } // end of getMinAndMaxPrice callback
+                    ); // end of getMinAndMaxPrice
+				}); // end of widget.onChartReady
+			}); // end of TradingView.onready
 
-                    widget.createMultipointShape([
-                        { time: new Date().valueOf() / 1000 - 30 * 24 * 60 * 60, price: position.getPrice()},
-                        { time: new Date().valueOf() / 1000 - 60 * 24 * 60 * 60, price: position.getPrice() * 1.5},
-                    ], {
-                        shape: "trend_line"
-                    });
-
-                    widget.createMultipointShape([
-                        { time: new Date().valueOf() / 1000 - 60 * 24 * 60 * 60, price: position.getPrice()},
-                        { time: new Date().valueOf() / 1000 - 30 * 24 * 60 * 60, price: position.getPrice() * 1.5},
-                    ], {
-                        shape: "trend_line",
-                        lock: true,
-                        overrides: {linecolor: "#0000FF", linewidth: 2}
-                    });
-
-                    widget.createMultipointShape([
-                        { time: new Date().valueOf() / 1000 - 70 * 24 * 60 * 60, price: position.getPrice()},
-                        { time: new Date().valueOf() / 1000 - 35 * 24 * 60 * 60, price: position.getPrice() * 1.5},
-                        { time: new Date().valueOf() / 1000, price: position.getPrice()},
-                        { time: new Date().valueOf() / 1000 - 70 * 24 * 60 * 60, price: position.getPrice() * 1.3},
-                        { time: new Date().valueOf() / 1000, price: position.getPrice() * 1.3},
-
-                    ], {
-                        shape: "polyline",
-                        overrides: {linecolor: "#FF0000", linewidth: 1, backgroundColor: "#00FF00"}
-                    });
-				});
-			});
+            function getMinAndMaxPrice(udf_datafeed, time1, time2, callback) {
+                var minPrice = 99999, maxPrice = 0;
+                var	minPriceTime, maxPriceTime;
+                udf_datafeed.resolveSymbol("AA", function(symbolInfo) {
+                            udf_datafeed.getBars(symbolInfo, "D", time1, time2, function(bars) {
+                                        bars.forEach(function(bar) {
+                                            if (bar.time / 1000 >= time1 && bar.time / 1000 <= time2) {
+                                                if (bar.high > maxPrice) {
+                                                    maxPrice = bar.high;
+                                                    maxPriceTime = bar.time / 1000;
+                                                }
+                                                if (bar.low < minPrice) {
+                                                    minPrice = bar.low;
+                                                    minPriceTime = bar.time / 1000;
+                                                }
+                                            }
+                                        });
+                                        callback(minPrice, maxPrice, minPriceTime, maxPriceTime);
+                                    },
+                                    function(err) {
+                                    });
+                        },
+                        function(err) {
+                        });
+            }
 
 		</script>
 
