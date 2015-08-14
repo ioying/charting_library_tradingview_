@@ -31,7 +31,8 @@ Datafeeds.UDFCompatibleDatafeed.prototype.defaultConfiguration = function() {
 		supports_search: false,
 		supports_group_request: true,
 		supported_resolutions: ["1", "5", "15", "30", "60", "1D", "1W", "1M"],
-		supports_marks: false
+		supports_marks: false,
+		supports_timescale_marks: false
 	};
 };
 
@@ -174,6 +175,22 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getMarks = function (symbolInfo, range
 	}
 };
 
+Datafeeds.UDFCompatibleDatafeed.prototype.getTimescaleMarks = function (symbolInfo, rangeStart, rangeEnd, onDataCallback, resolution) {
+	if (this._configuration.supports_timescale_marks) {
+		this._send(this._datafeedURL + "/timescale_marks", {
+			symbol: symbolInfo.ticker.toUpperCase(),
+			from : rangeStart,
+			to: rangeEnd,
+			resolution: resolution
+		})
+			.done(function (response) {
+				onDataCallback(JSON.parse(response));
+			})
+			.fail(function() {
+				onDataCallback([]);
+			});
+	}
+};
 
 Datafeeds.UDFCompatibleDatafeed.prototype.searchSymbolsByName = function(ticker, exchange, type, onResultReadyCallback) {
 	var MAX_SEARCH_RESULTS = 30;
