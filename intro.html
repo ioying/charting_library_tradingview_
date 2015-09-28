@@ -17,7 +17,7 @@
 			TradingView.onready(function()
 			{
 				var widget = new TradingView.widget({
-					fullscreen: true,
+                    fullscreen: true,
 					symbol: 'AA',
 					interval: 'D',
 					container_id: "tv_chart_container",
@@ -27,9 +27,10 @@
 					locale: "en",
 					//	Regression Trend-related functionality is not implemented yet, so it's hidden for a while
 					drawings_access: { type: 'black', tools: [ { name: "Regression Trend" } ] },
-					enabled_features: ["trading_options"],
+					enabled_features: ["chart_property_page_trading"],
 					disabled_features: ["use_localstorage_for_settings"],
 					charts_storage_url: 'http://saveload.tradingview.com',
+                    charts_storage_api_version: "1.1",
 					client_id: 'tradingview.com',
 					user_id: 'public_user_id'
 
