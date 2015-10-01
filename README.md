@@ -8,3 +8,6 @@ See our docs @ this repository's [wiki](https://github.com/tradingview/charting_
 
 ###Issues Tracking
 We use GitHub [Issues tracker](https://github.com/tradingview/charting_library/issues) for our project. Feel free to create bug reports and features requests. Please try reading the doc before asking questions because we will have more time for development then. 
+
+###Stay Tuned
+[Follow us](https://twitter.com/intent/follow?screen_name=tv_charts) on Twitter to receive the updates.
