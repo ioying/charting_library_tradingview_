@@ -139,17 +139,13 @@
 
 					widget.createButton()
 						.on('click', function (e) {
-							widget.createStudyTemplate({saveInterval: false}, function(data) {
-								savedTemplate = data;
-							});
+							 savedTemplate = widget.createStudyTemplate({saveInterval: false});
 						 })
 						.append($('<span>save template (-i)</span>'));
 
 					widget.createButton()
 						.on('click', function (e) {
-							widget.createStudyTemplate({saveInterval: true}, function(data) {
-								savedTemplate = data;
-							});
+							savedTemplate = widget.createStudyTemplate({saveInterval: true});
 						 })
 						.append($('<span>save template (+i)</span>'));
 
@@ -263,9 +259,7 @@
 
 					widget.createButton()
 						.on('click', function (e) {
-							widget.getVisibleRange(function(range) {
-								console.log(range);
-							});
+							console.log(widget.getVisibleRange());
 						})
 						.append($('<span>get range</span>'));
 
@@ -315,6 +309,7 @@
                                         lock: true,
                                         disableSelection: true,
                                         disableSave: true,
+										disableUndo: true,
                                         overrides: {
                                             showLabel: true,
                                             fontSize: 30,
@@ -329,6 +324,7 @@
                                         lock: true,
                                         disableSelection: true,
                                         disableSave: true,
+										disableUndo: true,
                                         text: "3 month low at " + minPrice,
                                         overrides: { color: "#00FF00" }
                                     });
@@ -339,6 +335,7 @@
                                         lock: true,
                                         disableSelection: true,
                                         disableSave: true,
+										disableUndo: true,
                                         overrides: {
                                             showLabel: true,
                                             fontSize: 30,
@@ -353,6 +350,7 @@
                                         lock: true,
                                         disableSelection: true,
                                         disableSave: true,
+										disableUndo: true,
                                         text: "3 month high at " + maxPrice,
                                         overrides: { color: "#FF0000" }
                                     });
@@ -363,6 +361,7 @@
                                         lock: true,
                                         disableSelection: true,
                                         disableSave: true,
+										disableUndo: true,
                                         overrides: {
                                             showLabel: true,
                                             fontSize: 30,
@@ -378,6 +377,7 @@
                                         lock: true,
                                         disableSelection: true,
                                         disableSave: true,
+										disableUndo: true,
                                         text: "Trend",
                                         overrides: {
                                             color: "#000000",
