@@ -36,6 +36,18 @@ Datafeeds.UDFCompatibleDatafeed.prototype.defaultConfiguration = function() {
 	};
 };
 
+Datafeeds.UDFCompatibleDatafeed.prototype.getServerTime = function(callback) {
+	if (this._configuration.supports_time) {
+		this._send(this._datafeedURL + "/time", {})
+			.done(function (response) {
+				callback(+response);
+			})
+			.fail(function() {
+
+			});
+	}
+};
+
 Datafeeds.UDFCompatibleDatafeed.prototype.on = function (event, callback) {
 
 	if (!this._callbacks.hasOwnProperty(event)) {
