@@ -424,13 +424,19 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getQuotes = function(symbols, onDataCa
 			var data = JSON.parse(response);
 			if (data.s == "ok") {
 				//	JSON format is {s: "status", [{s: "symbol_status", n: "symbol_name", v: {"field1": "value1", "field2": "value2", ..., "fieldN": "valueN"}}]}
-				onDataCallback && onDataCallback(data.d);
+				if (onDataCallback) {
+					onDataCallback(data.d);
+				}
 			} else {
-				onErrorCallback && onErrorCallback(data.errmsg);
+				if (onErrorCallback) {
+					onErrorCallback(data.errmsg);
+				}
 			}
 		})
 		.fail(function (arg) {
-			onErrorCallback && onErrorCallback("network error: " + arg);
+			if (onErrorCallback) {
+				onErrorCallback("network error: " + arg);
+			}
 		});
 };
 
@@ -491,12 +497,12 @@ Datafeeds.SymbolsStorage.prototype._requestFullSymbolsList = function() {
 					that._onExchangeDataReceived(exchange, JSON.parse(response));
 					that._onAnyExchangeResponseReceived(exchange);
 				};
-			}(exchange))
+			}(exchange)) //jshint ignore:line
 			.fail(function(exchange) {
 				return function (reason) {
 					that._onAnyExchangeResponseReceived(exchange);
 				};
-			}(exchange));
+			}(exchange)); //jshint ignore:line
 	}
 };
 
@@ -505,9 +511,9 @@ Datafeeds.SymbolsStorage.prototype._requestFullSymbolsList = function() {
 Datafeeds.SymbolsStorage.prototype._onExchangeDataReceived = function(exchangeName, data) {
 
 	function tableField(data, name, index) {
-		return data[name] instanceof Array
-			? data[name][index]
-			: data[name];
+		return data[name] instanceof Array ?
+			data[name][index] :
+			data[name];
 	}
 
 	try
@@ -734,7 +740,7 @@ Datafeeds.DataPulseUpdater = function(datafeed, updateFrequency) {
 				function() {
 					that._requestsPending--;
 				});
-			})(subscriptionRecord);
+			})(subscriptionRecord); //jshint ignore:line
 
 		}
 	};
@@ -849,10 +855,10 @@ Datafeeds.QuotesPulseUpdater.prototype._updateQuotes = function(symbolsGetter) {
 						subscribers[i](data);
 					}
 				};
-			}(subscriptionRecord.listeners, listenerGUID),
+			}(subscriptionRecord.listeners, listenerGUID), //jshint ignore:line
 			// onErrorCallback
 			function (error) {
 				that._requestsPending--;
-			});
+			}); //jshint ignore:line
 	}
 };
