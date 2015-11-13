@@ -14,12 +14,12 @@
 
 		<script type="text/javascript">
 
-			function getParameterByName(name) {
-				name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-				var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-						results = regex.exec(location.search);
-				return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-			}
+            function getParameterByName(name) {
+                name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+                var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+                        results = regex.exec(location.search);
+                return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+            }
 
 			TradingView.onready(function()
 			{
@@ -37,9 +37,9 @@
 					disabled_features: ["use_localstorage_for_settings"],
 					enabled_features: ["study_templates"],
 					charts_storage_url: 'http://saveload.tradingview.com',
-					charts_storage_api_version: "1.1",
+                    charts_storage_api_version: "1.1",
 					client_id: 'tradingview.com',
-					user_id: 'public_user'
+					user_id: 'public_user_id'
 				});
 			});
 

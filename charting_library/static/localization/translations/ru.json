@@ -2800,7 +2800,7 @@
   "months": "месяцев",
   "years": "years",
   "<a class=\"signin\">Sign in</a> or <a class=\"signup\">sign up</a> to use paper trading": "<a class=\"signin\">Войдите</a> или <a class=\"signup\">зарегистрируйтесь</a> чтобы воспользоваться демо торговлей",
-  "Paper Trading is disconnected.": "Демо торговля не подключена",
+  "Paper Trading is disconnected.": "Демо торговля отключена",
   "long": "длинная",
   "short": "короткая",
   "1 day": "1 день",
