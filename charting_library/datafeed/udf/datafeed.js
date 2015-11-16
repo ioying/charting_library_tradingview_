@@ -204,7 +204,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getTimescaleMarks = function (symbolIn
 	}
 };
 
-Datafeeds.UDFCompatibleDatafeed.prototype.searchSymbolsByName = function(ticker, exchange, type, onResultReadyCallback) {
+Datafeeds.UDFCompatibleDatafeed.prototype.searchSymbols = function(searchString, exchange, type, onResultReadyCallback) {
 	var MAX_SEARCH_RESULTS = 30;
 
 	if (!this._configuration) {
@@ -216,7 +216,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.searchSymbolsByName = function(ticker,
 
 		this._send(this._datafeedURL + "/search", {
 				limit: MAX_SEARCH_RESULTS,
-				query: ticker.toUpperCase(),
+				query: searchString.toUpperCase(),
 				type: type,
 				exchange: exchange
 			})
@@ -248,21 +248,21 @@ Datafeeds.UDFCompatibleDatafeed.prototype.searchSymbolsByName = function(ticker,
 		}
 
 		var searchArgument = {
-			ticker: ticker,
+			searchString: searchString,
 			exchange: exchange,
 			type: type,
 			onResultReadyCallback: onResultReadyCallback
 		};
 
 		if (this._initializationFinished) {
-			this._symbolSearch.searchSymbolsByName(searchArgument, MAX_SEARCH_RESULTS);
+			this._symbolSearch.searchSymbols(searchArgument, MAX_SEARCH_RESULTS);
 		}
 		else {
 
 			var that = this;
 
 			this.on("initialized", function() {
-				that._symbolSearch.searchSymbolsByName(searchArgument, MAX_SEARCH_RESULTS);
+				that._symbolSearch.searchSymbols(searchArgument, MAX_SEARCH_RESULTS);
 			});
 		}
 	}
@@ -614,8 +614,8 @@ Datafeeds.SymbolSearchComponent = function(datafeed) {
 
 
 
-//	searchArgument = { ticker, onResultReadyCallback}
-Datafeeds.SymbolSearchComponent.prototype.searchSymbolsByName = function(searchArgument, maxSearchResults) {
+//	searchArgument = { searchString, onResultReadyCallback}
+Datafeeds.SymbolSearchComponent.prototype.searchSymbols = function(searchArgument, maxSearchResults) {
 
 	if (!this._datafeed._symbolsStorage) {
 		throw "Cannot use local symbol search when no groups information is available";
@@ -623,8 +623,9 @@ Datafeeds.SymbolSearchComponent.prototype.searchSymbolsByName = function(searchA
 
 	var symbolsStorage = this._datafeed._symbolsStorage;
 
-	var results = [];
-	var queryIsEmpty = !searchArgument.ticker || searchArgument.ticker.length === 0;
+	var results = []; // array of WeightedItem { item, weight }
+	var queryIsEmpty = !searchArgument.searchString || searchArgument.searchString.length === 0;
+	var searchStringUpperCase = searchArgument.searchString.toUpperCase();
 
 	for (var i = 0; i < symbolsStorage._symbolsList.length; ++i) {
 		var symbolName = symbolsStorage._symbolsList[i];
@@ -636,24 +637,44 @@ Datafeeds.SymbolSearchComponent.prototype.searchSymbolsByName = function(searchA
 		if (searchArgument.exchange && searchArgument.exchange.length > 0 && item.exchange != searchArgument.exchange) {
 			continue;
 		}
-		if (queryIsEmpty || item.name.indexOf(searchArgument.ticker) === 0) {
-			results.push({
-				symbol: item.name,
-				full_name: item.full_name,
-				description: item.description,
-				exchange: item.exchange,
-				params: [],
-				type: item.type,
-				ticker: item.name
-			});
-		}
 
-		if (results.length >= maxSearchResults) {
-			break;
+		var positionInName = item.name.toUpperCase().indexOf(searchStringUpperCase);
+		var positionInDescription = item.description.toUpperCase().indexOf(searchStringUpperCase);
+
+		if (queryIsEmpty || positionInName >= 0 || positionInDescription >= 0) {
+			var found = false;
+			for (var resultIndex = 0; resultIndex < results.length; resultIndex++) {
+				if (results[resultIndex].item == item) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				var weight = positionInName >= 0 ? positionInName : 8000 + positionInDescription;
+				results.push({ item: item, weight: weight });
+			}
 		}
 	}
 
-	searchArgument.onResultReadyCallback(results);
+	searchArgument.onResultReadyCallback(
+		results
+			.sort(function (weightedItem1, weightedItem2) {
+				return weightedItem1.weight - weightedItem2.weight;
+			})
+			.map(function (weightedItem) {
+				var item = weightedItem.item;
+				return {
+					symbol: item.name,
+					full_name: item.full_name,
+					description: item.description,
+					exchange: item.exchange,
+					params: [],
+					type: item.type,
+					ticker: item.name
+				};
+			})
+			.slice(0, Math.min(results.length, maxSearchResults))
+	);
 };
 
 
