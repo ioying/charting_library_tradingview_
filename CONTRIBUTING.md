@@ -1,12 +1,8 @@
 ##If you are experiencing issues
 
-We are always eager to help you. But we are really busy guys, because we work hard to make Charting Library even better, so we don’t have much time. Please help us spend our time effectively and always update your Library's build to the latest `unstable` version to check if the issue still happens. Contact us if it does.
+We are always eager to help you. But we are really busy guys, because we work hard to make Charting Library even better, so we donâ€™t have much time. Please help us spend our time effectively and always update your Library's build to the latest `unstable` version to check if the issue still happens. Contact us if it does.
 
 **The latest version is always available at https://demo_chart.tradingview.com**
-
-Also, check the data you are passing to the Charting Library and make sure it matches our requirements as described in the documentation. Pay special attention to SymbolInfo content because it's the most common place to make an error (according to our statistics).
-
-You can watch the output of our [demo data](http://demo_feed.tradingview.com/symbols?symbol=AA) service and compare it to yours to ensure your backend behaves like it should.
 
 ##Reporting a bug
 * Report the version of the library. You can check it with `TradingView.version()` from the browser console.
@@ -19,4 +15,4 @@ You can watch the output of our [demo data](http://demo_feed.tradingview.com/sym
 * Provide screenshots if possible
  
 ##Requesting a new feature
-* While we would love to be able to implement everything, we simply don’t have the resources. At this time, please be aware we have long term plans and quick implementation of new feature request should not be expected. However, we review everything and take your many great suggestions into account. Thank you for playing an active part in building the TradingView community!
+* While we would love to be able to implement everything, we simply donâ€™t have the resources. At this time, please be aware we have long term plans and quick implementation of new feature request should not be expected. However, we review everything and take your many great suggestions into account. Thank you for playing an active part in building the TradingView community!
