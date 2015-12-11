@@ -117,7 +117,9 @@ Datafeeds.UDFCompatibleDatafeed.prototype._initialize = function() {
 Datafeeds.UDFCompatibleDatafeed.prototype.onReady = function(callback) {
 
 	if (this._configuration) {
-		callback(this._configuration);
+		setTimeout(function() {
+			callback(this._configuration);
+		}, 0);
 	} else {
 		var that = this;
 		this.on('configuration_ready', function() {
@@ -564,13 +566,15 @@ Datafeeds.SymbolsStorage.prototype._onAnyExchangeResponseReceived = function(exc
 
 //	BEWARE: this function does not consider symbol's exchange
 Datafeeds.SymbolsStorage.prototype.resolveSymbol = function(symbolName, onSymbolResolvedCallback, onResolveErrorCallback) {
+	var that = this;
 
-	if (!this._symbolsInfo.hasOwnProperty(symbolName)) {
-		onResolveErrorCallback('invalid symbol');
-	} else {
-		onSymbolResolvedCallback(this._symbolsInfo[symbolName]);
-	}
-
+	setTimeout(function() {
+		if (!that._symbolsInfo.hasOwnProperty(symbolName)) {
+			onResolveErrorCallback('invalid symbol');
+		} else {
+			onSymbolResolvedCallback(that._symbolsInfo[symbolName]);
+		}
+	}, 0);
 };
 
 //	==================================================================================================================================================
