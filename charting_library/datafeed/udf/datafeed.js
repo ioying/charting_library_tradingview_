@@ -115,13 +115,12 @@ Datafeeds.UDFCompatibleDatafeed.prototype._initialize = function() {
 };
 
 Datafeeds.UDFCompatibleDatafeed.prototype.onReady = function(callback) {
-
+	var that = this;
 	if (this._configuration) {
 		setTimeout(function() {
-			callback(this._configuration);
+			callback(that._configuration);
 		}, 0);
 	} else {
-		var that = this;
 		this.on('configuration_ready', function() {
 			callback(that._configuration);
 		});
