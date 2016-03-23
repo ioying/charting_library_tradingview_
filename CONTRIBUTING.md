@@ -1,3 +1,6 @@
+##General
+* Please use English. We want to share experience between our customers to increase effectiveness of this bug tracker.
+
 ##Reporting a bug
 * Please help us spend our time effectively and always update your Library's build to the latest `unstable` version to check if the issue still happens. You can also find the Charting Library built from `unstable` at https://demo_chart.tradingview.com
 * Report a version of the library. You can check it with `TradingView.version()` from the browser console
