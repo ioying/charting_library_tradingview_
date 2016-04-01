@@ -263,7 +263,7 @@
 						})
 						.append($('<span>get range</span>'));
 
-					var position = widget.createPositionLine()
+					var position = widget.chart().createPositionLine()
 						.onReverse(function(text) {
 							console.log("Position reverse event");
 						})
@@ -275,7 +275,7 @@
 						.setLineLength(3);
 					position.setPrice(position.getPrice() - 2);
 
-					var order = widget.createOrderLine()
+					var order = widget.chart().createOrderLine()
 						.onMove(function() {
 							console.log("Order moved event");
 						})
@@ -287,7 +287,7 @@
 						.setQuantity("2");
 					order.setPrice(order.getPrice() - 2.5);
 
-					widget.createExecutionShape()
+					widget.chart().createExecutionShape()
 						.setText("@1,320.75 Limit Buy 1")
 						.setTextColor("rgba(255,0,0,0.5)")
 						.setArrowSpacing(25)
@@ -302,7 +302,7 @@
                     // draw some simple technical analysis figures using drawings to show how it works
                     getMinAndMaxPrice(udf_datafeed, fourMonthAgo, today,
                         function(minPrice, maxPrice, minPriceTime, maxPriceTime) {
-                            widget.createMultipointShape(
+                            widget.chart().createMultipointShape(
                                     [{time:fourMonthAgo, price: minPrice}, {time:today, price: minPrice}],
                                     {
                                         shape: "trend_line",
@@ -318,7 +318,7 @@
                                         }
                                     }
                             );
-                            widget.createShape({time: Math.floor((fourMonthAgo + today) / 2), price: minPrice},
+                            widget.chart().createShape({time: Math.floor((fourMonthAgo + today) / 2), price: minPrice},
                                     {
                                         shape: "text",
                                         lock: true,
@@ -328,7 +328,7 @@
                                         text: "3 month low at " + minPrice,
                                         overrides: { color: "#00FF00" }
                                     });
-                            widget.createMultipointShape(
+                            widget.chart().createMultipointShape(
                                     [{time:fourMonthAgo, price: maxPrice}, {time:today, price: maxPrice}],
                                     {
                                         shape: "trend_line",
@@ -344,7 +344,7 @@
                                         }
                                     }
                             );
-                            widget.createShape({time: Math.floor((fourMonthAgo + today) / 2), price: maxPrice},
+                            widget.chart().createShape({time: Math.floor((fourMonthAgo + today) / 2), price: maxPrice},
                                     {
                                         shape: "text",
                                         lock: true,
@@ -354,7 +354,7 @@
                                         text: "3 month high at " + maxPrice,
                                         overrides: { color: "#FF0000" }
                                     });
-                            widget.createMultipointShape(
+                            widget.chart().createMultipointShape(
                                     [{time:maxPriceTime, price: maxPrice}, {time:minPriceTime, price: minPrice}],
                                     {
                                         shape: "trend_line",
@@ -369,7 +369,7 @@
                                         }
                                     }
                             );
-                            widget.createMultipointShape(
+                            widget.chart().createMultipointShape(
                                     [{time: Math.floor((maxPriceTime + minPriceTime) / 2), price: (maxPrice + minPrice) / 2},
                                         {time: Math.floor((maxPriceTime + minPriceTime) / 2) + 5 * 24 * 60 * 60, price: (maxPrice + minPrice) / 2 * 1.1}],
                                     {

@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 /*
 	This class implements interaction with UDF-compatible datafeed.
 
@@ -30,7 +30,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.defaultConfiguration = function() {
 	return {
 		supports_search: false,
 		supports_group_request: true,
-		supported_resolutions: ["1", "5", "15", "30", "60", "1D", "1W", "1M"],
+		supported_resolutions: ['1', '5', '15', '30', '60', '1D', '1W', '1M'],
 		supports_marks: false,
 		supports_timescale_marks: false
 	};
@@ -38,7 +38,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.defaultConfiguration = function() {
 
 Datafeeds.UDFCompatibleDatafeed.prototype.getServerTime = function(callback) {
 	if (this._configuration.supports_time) {
-		this._send(this._datafeedURL + "/time", {})
+		this._send(this._datafeedURL + '/time', {})
 			.done(function (response) {
 				callback(+response);
 			})
@@ -58,31 +58,28 @@ Datafeeds.UDFCompatibleDatafeed.prototype.on = function (event, callback) {
 	return this;
 };
 
-
 Datafeeds.UDFCompatibleDatafeed.prototype._fireEvent = function(event, argument) {
 	if (this._callbacks.hasOwnProperty(event)) {
 		var callbacksChain = this._callbacks[event];
 		for (var i = 0; i < callbacksChain.length; ++i) {
 			callbacksChain[i](argument);
 		}
+
 		this._callbacks[event] = [];
 	}
 };
 
 Datafeeds.UDFCompatibleDatafeed.prototype.onInitialized = function() {
 	this._initializationFinished = true;
-	this._fireEvent("initialized");
+	this._fireEvent('initialized');
 };
-
-
 
 Datafeeds.UDFCompatibleDatafeed.prototype._logMessage = function(message) {
 	if (this._enableLogging) {
 		var now = new Date();
-		console.log(now.toLocaleTimeString() + "." + now.getMilliseconds() + "> " + message);
+		console.log(now.toLocaleTimeString() + '.' + now.getMilliseconds() + '> ' + message);
 	}
 };
-
 
 Datafeeds.UDFCompatibleDatafeed.prototype._send = function(url, params) {
 	var request = url;
@@ -90,11 +87,11 @@ Datafeeds.UDFCompatibleDatafeed.prototype._send = function(url, params) {
 		for (var i = 0; i < Object.keys(params).length; ++i) {
 			var key = Object.keys(params)[i];
 			var value = encodeURIComponent(params[key]);
-			request += (i === 0 ? "?" : "&") + key + "=" + value;
+			request += (i === 0 ? '?' : '&') + key + '=' + value;
 		}
 	}
 
-	this._logMessage("New request: " + request);
+	this._logMessage('New request: ' + request);
 
 	return $.ajax({
 		type: 'GET',
@@ -107,7 +104,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype._initialize = function() {
 
 	var that = this;
 
-	this._send(this._datafeedURL + "/config")
+	this._send(this._datafeedURL + '/config')
 		.done(function(response) {
 			var configurationData = JSON.parse(response);
 			that._setupWithConfiguration(configurationData);
@@ -117,15 +114,14 @@ Datafeeds.UDFCompatibleDatafeed.prototype._initialize = function() {
 		});
 };
 
-
 Datafeeds.UDFCompatibleDatafeed.prototype.onReady = function(callback) {
-
+	var that = this;
 	if (this._configuration) {
-		callback(this._configuration);
-	}
-	else {
-		var that = this;
-		this.on("configuration_ready", function() {
+		setTimeout(function() {
+			callback(that._configuration);
+		}, 0);
+	} else {
+		this.on('configuration_ready', function() {
 			callback(that._configuration);
 		});
 	}
@@ -147,7 +143,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype._setupWithConfiguration = function(con
 	configurationData.symbols_types = symbolsTypes;
 
 	if (!configurationData.supports_search && !configurationData.supports_group_request) {
-		throw "Unsupported datafeed configuration. Must either support search, or support group request";
+		throw 'Unsupported datafeed configuration. Must either support search, or support group request';
 	}
 
 	if (!configurationData.supports_search) {
@@ -157,24 +153,22 @@ Datafeeds.UDFCompatibleDatafeed.prototype._setupWithConfiguration = function(con
 	if (configurationData.supports_group_request) {
 		//	this component will call onInitialized() by itself
 		this._symbolsStorage = new Datafeeds.SymbolsStorage(this);
-	}
-	else {
+	} else {
 		this.onInitialized();
 	}
 
-	this._fireEvent("configuration_ready");
-	this._logMessage("Initialized with " + JSON.stringify(configurationData));
+	this._fireEvent('configuration_ready');
+	this._logMessage('Initialized with ' + JSON.stringify(configurationData));
 };
-
 
 //	===============================================================================================================================
 //	The functions set below is the implementation of JavaScript API.
 
 Datafeeds.UDFCompatibleDatafeed.prototype.getMarks = function (symbolInfo, rangeStart, rangeEnd, onDataCallback, resolution) {
 	if (this._configuration.supports_marks) {
-		this._send(this._datafeedURL + "/marks", {
+		this._send(this._datafeedURL + '/marks', {
 				symbol: symbolInfo.ticker.toUpperCase(),
-				from : rangeStart,
+				from: rangeStart,
 				to: rangeEnd,
 				resolution: resolution
 			})
@@ -189,9 +183,9 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getMarks = function (symbolInfo, range
 
 Datafeeds.UDFCompatibleDatafeed.prototype.getTimescaleMarks = function (symbolInfo, rangeStart, rangeEnd, onDataCallback, resolution) {
 	if (this._configuration.supports_timescale_marks) {
-		this._send(this._datafeedURL + "/timescale_marks", {
+		this._send(this._datafeedURL + '/timescale_marks', {
 			symbol: symbolInfo.ticker.toUpperCase(),
-			from : rangeStart,
+			from: rangeStart,
 			to: rangeEnd,
 			resolution: resolution
 		})
@@ -204,7 +198,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getTimescaleMarks = function (symbolIn
 	}
 };
 
-Datafeeds.UDFCompatibleDatafeed.prototype.searchSymbolsByName = function(ticker, exchange, type, onResultReadyCallback) {
+Datafeeds.UDFCompatibleDatafeed.prototype.searchSymbols = function(searchString, exchange, type, onResultReadyCallback) {
 	var MAX_SEARCH_RESULTS = 30;
 
 	if (!this._configuration) {
@@ -214,9 +208,9 @@ Datafeeds.UDFCompatibleDatafeed.prototype.searchSymbolsByName = function(ticker,
 
 	if (this._configuration.supports_search) {
 
-		this._send(this._datafeedURL + "/search", {
+		this._send(this._datafeedURL + '/search', {
 				limit: MAX_SEARCH_RESULTS,
-				query: ticker.toUpperCase(),
+				query: searchString.toUpperCase(),
 				type: type,
 				exchange: exchange
 			})
@@ -229,10 +223,9 @@ Datafeeds.UDFCompatibleDatafeed.prototype.searchSymbolsByName = function(ticker,
 					}
 				}
 
-				if (typeof data.s == "undefined" || data.s != "error") {
+				if (typeof data.s == 'undefined' || data.s != 'error') {
 					onResultReadyCallback(data);
-				}
-				else {
+				} else {
 					onResultReadyCallback([]);
 				}
 
@@ -240,37 +233,33 @@ Datafeeds.UDFCompatibleDatafeed.prototype.searchSymbolsByName = function(ticker,
 			.fail(function(reason) {
 				onResultReadyCallback([]);
 			});
-	}
-	else {
+	} else {
 
 		if (!this._symbolSearch) {
-			throw "Datafeed error: inconsistent configuration (symbol search)";
+			throw 'Datafeed error: inconsistent configuration (symbol search)';
 		}
 
 		var searchArgument = {
-			ticker: ticker,
+			searchString: searchString,
 			exchange: exchange,
 			type: type,
 			onResultReadyCallback: onResultReadyCallback
 		};
 
 		if (this._initializationFinished) {
-			this._symbolSearch.searchSymbolsByName(searchArgument, MAX_SEARCH_RESULTS);
-		}
-		else {
+			this._symbolSearch.searchSymbols(searchArgument, MAX_SEARCH_RESULTS);
+		} else {
 
 			var that = this;
 
-			this.on("initialized", function() {
-				that._symbolSearch.searchSymbolsByName(searchArgument, MAX_SEARCH_RESULTS);
+			this.on('initialized', function() {
+				that._symbolSearch.searchSymbols(searchArgument, MAX_SEARCH_RESULTS);
 			});
 		}
 	}
 };
 
-
-Datafeeds.UDFCompatibleDatafeed.prototype._symbolResolveURL = "/symbols";
-
+Datafeeds.UDFCompatibleDatafeed.prototype._symbolResolveURL = '/symbols';
 
 //	BEWARE: this function does not consider symbol's exchange
 Datafeeds.UDFCompatibleDatafeed.prototype.resolveSymbol = function(symbolName, onSymbolResolvedCallback, onResolveErrorCallback) {
@@ -278,7 +267,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.resolveSymbol = function(symbolName, o
 	var that = this;
 
 	if (!this._initializationFinished) {
-		this.on("initialized", function() {
+		this.on('initialized', function() {
 			that.resolveSymbol(symbolName, onSymbolResolvedCallback, onResolveErrorCallback);
 		});
 
@@ -286,7 +275,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.resolveSymbol = function(symbolName, o
 	}
 
 	var resolveRequestStartTime = Date.now();
-	that._logMessage("Resolve requested");
+	that._logMessage('Resolve requested');
 
 	function onResultReady(data) {
 		var postProcessedData = data;
@@ -294,50 +283,46 @@ Datafeeds.UDFCompatibleDatafeed.prototype.resolveSymbol = function(symbolName, o
 			postProcessedData = that.postProcessSymbolInfo(postProcessedData);
 		}
 
-		that._logMessage("Symbol resolved: " + (Date.now() - resolveRequestStartTime));
+		that._logMessage('Symbol resolved: ' + (Date.now() - resolveRequestStartTime));
 
 		onSymbolResolvedCallback(postProcessedData);
 	}
 
 	if (!this._configuration.supports_group_request) {
 		this._send(this._datafeedURL + this._symbolResolveURL, {
-				symbol: symbolName ? symbolName.toUpperCase() : ""
+				symbol: symbolName ? symbolName.toUpperCase() : ''
 			})
 			.done(function (response) {
 				var data = JSON.parse(response);
 
-				if (data.s && data.s != "ok") {
-					onResolveErrorCallback("unknown_symbol");
-				}
-				else {
+				if (data.s && data.s != 'ok') {
+					onResolveErrorCallback('unknown_symbol');
+				} else {
 					onResultReady(data);
 				}
 			})
 			.fail(function(reason) {
-				that._logMessage("Error resolving symbol: " + JSON.stringify([reason]));
-				onResolveErrorCallback("unknown_symbol");
+				that._logMessage('Error resolving symbol: ' + JSON.stringify([reason]));
+				onResolveErrorCallback('unknown_symbol');
 			});
-	}
-	else {
+	} else {
 		if (this._initializationFinished) {
 			this._symbolsStorage.resolveSymbol(symbolName, onResultReady, onResolveErrorCallback);
-		}
-		else {
-			this.on("initialized", function() {
+		} else {
+			this.on('initialized', function() {
 				that._symbolsStorage.resolveSymbol(symbolName, onResultReady, onResolveErrorCallback);
 			});
 		}
 	}
 };
 
-
-Datafeeds.UDFCompatibleDatafeed.prototype._historyURL = "/history";
+Datafeeds.UDFCompatibleDatafeed.prototype._historyURL = '/history';
 
 Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolution, rangeStartDate, rangeEndDate, onDataCallback, onErrorCallback) {
 
 	//	timestamp sample: 1399939200
-	if (rangeStartDate > 0 && (rangeStartDate + "").length > 10) {
-		throw ["Got a JS time instead of Unix one.", rangeStartDate, rangeEndDate];
+	if (rangeStartDate > 0 && (rangeStartDate + '').length > 10) {
+		throw ['Got a JS time instead of Unix one.', rangeStartDate, rangeEndDate];
 	}
 
 	var that = this;
@@ -345,21 +330,22 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolut
 	var requestStartTime = Date.now();
 
 	this._send(this._datafeedURL + this._historyURL, {
-			symbol: symbolInfo.ticker.toUpperCase(),
-			resolution: resolution,
-			from: rangeStartDate,
-			to: rangeEndDate
+		symbol: symbolInfo.ticker.toUpperCase(),
+		resolution: resolution,
+		from: rangeStartDate,
+		to: rangeEndDate
 	})
 	.done(function (response) {
 
 		var data = JSON.parse(response);
 
-		var nodata = data.s == "no_data";
+		var nodata = data.s == 'no_data';
 
-		if (data.s != "ok" && !nodata) {
+		if (data.s != 'ok' && !nodata) {
 			if (!!onErrorCallback) {
 				onErrorCallback(data.s);
 			}
+
 			return;
 		}
 
@@ -369,8 +355,8 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolut
 		//  v: [volumes], t: [times], o: [opens], h: [highs], l: [lows], c:[closes], nb: "optional_unixtime_if_no_data"}
 		var barsCount = nodata ? 0 : data.t.length;
 
-		var volumePresent = typeof data.v != "undefined";
-		var ohlPresent = typeof data.o != "undefined";
+		var volumePresent = typeof data.v != 'undefined';
+		var ohlPresent = typeof data.o != 'undefined';
 
 		for (var i = 0; i < barsCount; ++i) {
 
@@ -383,8 +369,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolut
 				barValue.open = data.o[i];
 				barValue.high = data.h[i];
 				barValue.low = data.l[i];
-			}
-			else {
+			} else {
 				barValue.open = barValue.high = barValue.low = barValue.close;
 			}
 
@@ -398,14 +383,13 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolut
 		onDataCallback(bars, {version: that._protocolVersion, noData: nodata, nextTime: data.nb || data.nextTime});
 	})
 	.fail(function (arg) {
-		console.warn(["getBars(): HTTP error", arg]);
+		console.warn(['getBars(): HTTP error', arg]);
 
 		if (!!onErrorCallback) {
-			onErrorCallback("network error: " + JSON.stringify(arg));
+			onErrorCallback('network error: ' + JSON.stringify(arg));
 		}
 	});
 };
-
 
 Datafeeds.UDFCompatibleDatafeed.prototype.subscribeBars = function(symbolInfo, resolution, onRealtimeCallback, listenerGUID) {
 	this._barsPulseUpdater.subscribeDataListener(symbolInfo, resolution, onRealtimeCallback, listenerGUID);
@@ -419,10 +403,10 @@ Datafeeds.UDFCompatibleDatafeed.prototype.calculateHistoryDepth = function(perio
 };
 
 Datafeeds.UDFCompatibleDatafeed.prototype.getQuotes = function(symbols, onDataCallback, onErrorCallback) {
-	this._send(this._datafeedURL + "/quotes", { symbols: symbols })
+	this._send(this._datafeedURL + '/quotes', { symbols: symbols })
 		.done(function (response) {
 			var data = JSON.parse(response);
-			if (data.s == "ok") {
+			if (data.s == 'ok') {
 				//	JSON format is {s: "status", [{s: "symbol_status", n: "symbol_name", v: {"field1": "value1", "field2": "value2", ..., "fieldN": "valueN"}}]}
 				if (onDataCallback) {
 					onDataCallback(data.d);
@@ -435,7 +419,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getQuotes = function(symbols, onDataCa
 		})
 		.fail(function (arg) {
 			if (onErrorCallback) {
-				onErrorCallback("network error: " + arg);
+				onErrorCallback('network error: ' + arg);
 			}
 		});
 };
@@ -460,7 +444,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.unsubscribeQuotes = function(listenerG
 Datafeeds.SymbolsStorage = function(datafeed) {
 	this._datafeed = datafeed;
 
-	this._exchangesList = ["NYSE", "FOREX", "AMEX"];
+	this._exchangesList = ['NYSE', 'FOREX', 'AMEX'];
 	this._exchangesWaitingForData = {};
 	this._exchangesDataCache = {};
 
@@ -469,8 +453,6 @@ Datafeeds.SymbolsStorage = function(datafeed) {
 
 	this._requestFullSymbolsList();
 };
-
-
 
 Datafeeds.SymbolsStorage.prototype._requestFullSymbolsList = function() {
 
@@ -487,9 +469,9 @@ Datafeeds.SymbolsStorage.prototype._requestFullSymbolsList = function() {
 
 		this._exchangesDataCache[exchange] = true;
 
-		this._exchangesWaitingForData[exchange] = "waiting_for_data";
+		this._exchangesWaitingForData[exchange] = 'waiting_for_data';
 
-		this._datafeed._send(this._datafeed._datafeedURL + "/symbol_info", {
+		this._datafeed._send(this._datafeed._datafeedURL + '/symbol_info', {
 				group: exchange
 			})
 			.done(function(exchange) {
@@ -506,8 +488,6 @@ Datafeeds.SymbolsStorage.prototype._requestFullSymbolsList = function() {
 	}
 };
 
-
-
 Datafeeds.SymbolsStorage.prototype._onExchangeDataReceived = function(exchangeName, data) {
 
 	function tableField(data, name, index) {
@@ -521,44 +501,44 @@ Datafeeds.SymbolsStorage.prototype._onExchangeDataReceived = function(exchangeNa
 		for (var symbolIndex = 0; symbolIndex < data.symbol.length; ++symbolIndex) {
 
 			var symbolName = data.symbol[symbolIndex];
-			var listedExchange = tableField(data, "exchange-listed", symbolIndex);
-			var tradedExchange = tableField(data, "exchange-traded", symbolIndex);
-			var fullName = tradedExchange + ":" + symbolName;
+			var listedExchange = tableField(data, 'exchange-listed', symbolIndex);
+			var tradedExchange = tableField(data, 'exchange-traded', symbolIndex);
+			var fullName = tradedExchange + ':' + symbolName;
 
 			//	This feature support is not implemented yet
 			//	var hasDWM = tableField(data, "has-dwm", symbolIndex);
 
-			var hasIntraday = tableField(data, "has-intraday", symbolIndex);
+			var hasIntraday = tableField(data, 'has-intraday', symbolIndex);
 
-			var tickerPresent = typeof data.ticker != "undefined";
+			var tickerPresent = typeof data.ticker != 'undefined';
 
 			var symbolInfo = {
 				name: symbolName,
-				base_name: [listedExchange + ":" + symbolName],
-				description: tableField(data, "description", symbolIndex),
+				base_name: [listedExchange + ':' + symbolName],
+				description: tableField(data, 'description', symbolIndex),
 				full_name: fullName,
 				legs: [fullName],
 				has_intraday: hasIntraday,
-				has_no_volume: tableField(data, "has-no-volume", symbolIndex),
+				has_no_volume: tableField(data, 'has-no-volume', symbolIndex),
 				listed_exchange: listedExchange,
 				exchange: tradedExchange,
-				minmov: tableField(data, "minmovement", symbolIndex) || tableField(data, "minmov", symbolIndex) ,
-				minmove2: tableField(data, "minmove2", symbolIndex) || tableField(data, "minmov2", symbolIndex) ,
-				fractional: tableField(data, "fractional", symbolIndex),
-				pointvalue: tableField(data, "pointvalue", symbolIndex),
-				pricescale: tableField(data, "pricescale", symbolIndex),
-				type: tableField(data, "type", symbolIndex),
-				session: tableField(data, "session-regular", symbolIndex),
-				ticker: tickerPresent ? tableField(data, "ticker", symbolIndex) : symbolName,
-				timezone: tableField(data, "timezone", symbolIndex),
-				supported_resolutions: tableField(data, "supported-resolutions", symbolIndex) || this._datafeed.defaultConfiguration().supported_resolutions,
-				force_session_rebuild: tableField(data, "force-session-rebuild", symbolIndex) || false,
-				has_daily: tableField(data, "has-daily", symbolIndex) || true,
-				intraday_multipliers: tableField(data, "intraday-multipliers", symbolIndex) || ["1", "5", "15", "30", "60"],
-				has_fractional_volume: tableField(data, "has-fractional-volume", symbolIndex) || false,
-				has_weekly_and_monthly: tableField(data, "has-weekly-and-monthly", symbolIndex) || false,
-				has_empty_bars: tableField(data, "has-empty-bars", symbolIndex) || false,
-				volume_precision: tableField(data, "volume-precision", symbolIndex) || 0
+				minmov: tableField(data, 'minmovement', symbolIndex) || tableField(data, 'minmov', symbolIndex),
+				minmove2: tableField(data, 'minmove2', symbolIndex) || tableField(data, 'minmov2', symbolIndex),
+				fractional: tableField(data, 'fractional', symbolIndex),
+				pointvalue: tableField(data, 'pointvalue', symbolIndex),
+				pricescale: tableField(data, 'pricescale', symbolIndex),
+				type: tableField(data, 'type', symbolIndex),
+				session: tableField(data, 'session-regular', symbolIndex),
+				ticker: tickerPresent ? tableField(data, 'ticker', symbolIndex) : symbolName,
+				timezone: tableField(data, 'timezone', symbolIndex),
+				supported_resolutions: tableField(data, 'supported-resolutions', symbolIndex) || this._datafeed.defaultConfiguration().supported_resolutions,
+				force_session_rebuild: tableField(data, 'force-session-rebuild', symbolIndex) || false,
+				has_daily: tableField(data, 'has-daily', symbolIndex) || true,
+				intraday_multipliers: tableField(data, 'intraday-multipliers', symbolIndex) || ['1', '5', '15', '30', '60'],
+				has_fractional_volume: tableField(data, 'has-fractional-volume', symbolIndex) || false,
+				has_weekly_and_monthly: tableField(data, 'has-weekly-and-monthly', symbolIndex) || false,
+				has_empty_bars: tableField(data, 'has-empty-bars', symbolIndex) || false,
+				volume_precision: tableField(data, 'volume-precision', symbolIndex) || 0
 			};
 
 			this._symbolsInfo[symbolInfo.ticker] = this._symbolsInfo[symbolName] = this._symbolsInfo[fullName] = symbolInfo;
@@ -566,10 +546,9 @@ Datafeeds.SymbolsStorage.prototype._onExchangeDataReceived = function(exchangeNa
 		}
 	}
 	catch (error) {
-		throw "API error when processing exchange `" + exchangeName + "` symbol #" + symbolIndex + ": " + error;
+		throw 'API error when processing exchange `' + exchangeName + '` symbol #' + symbolIndex + ': ' + error;
 	}
 };
-
 
 Datafeeds.SymbolsStorage.prototype._onAnyExchangeResponseReceived = function(exchangeName) {
 
@@ -579,24 +558,23 @@ Datafeeds.SymbolsStorage.prototype._onAnyExchangeResponseReceived = function(exc
 
 	if (allDataReady) {
 		this._symbolsList.sort();
-		this._datafeed._logMessage("All exchanges data ready");
+		this._datafeed._logMessage('All exchanges data ready');
 		this._datafeed.onInitialized();
 	}
 };
 
-
 //	BEWARE: this function does not consider symbol's exchange
 Datafeeds.SymbolsStorage.prototype.resolveSymbol = function(symbolName, onSymbolResolvedCallback, onResolveErrorCallback) {
+	var that = this;
 
-	if (!this._symbolsInfo.hasOwnProperty(symbolName)) {
-		onResolveErrorCallback("invalid symbol");
-	}
-	else {
-		onSymbolResolvedCallback(this._symbolsInfo[symbolName]);
-	}
-
+	setTimeout(function() {
+		if (!that._symbolsInfo.hasOwnProperty(symbolName)) {
+			onResolveErrorCallback('invalid symbol');
+		} else {
+			onSymbolResolvedCallback(that._symbolsInfo[symbolName]);
+		}
+	}, 0);
 };
-
 
 //	==================================================================================================================================================
 //	==================================================================================================================================================
@@ -612,19 +590,18 @@ Datafeeds.SymbolSearchComponent = function(datafeed) {
 	this._datafeed = datafeed;
 };
 
-
-
-//	searchArgument = { ticker, onResultReadyCallback}
-Datafeeds.SymbolSearchComponent.prototype.searchSymbolsByName = function(searchArgument, maxSearchResults) {
+//	searchArgument = { searchString, onResultReadyCallback}
+Datafeeds.SymbolSearchComponent.prototype.searchSymbols = function(searchArgument, maxSearchResults) {
 
 	if (!this._datafeed._symbolsStorage) {
-		throw "Cannot use local symbol search when no groups information is available";
+		throw 'Cannot use local symbol search when no groups information is available';
 	}
 
 	var symbolsStorage = this._datafeed._symbolsStorage;
 
-	var results = [];
-	var queryIsEmpty = !searchArgument.ticker || searchArgument.ticker.length === 0;
+	var results = []; // array of WeightedItem { item, weight }
+	var queryIsEmpty = !searchArgument.searchString || searchArgument.searchString.length === 0;
+	var searchStringUpperCase = searchArgument.searchString.toUpperCase();
 
 	for (var i = 0; i < symbolsStorage._symbolsList.length; ++i) {
 		var symbolName = symbolsStorage._symbolsList[i];
@@ -633,30 +610,50 @@ Datafeeds.SymbolSearchComponent.prototype.searchSymbolsByName = function(searchA
 		if (searchArgument.type && searchArgument.type.length > 0 && item.type != searchArgument.type) {
 			continue;
 		}
+
 		if (searchArgument.exchange && searchArgument.exchange.length > 0 && item.exchange != searchArgument.exchange) {
 			continue;
 		}
-		if (queryIsEmpty || item.name.indexOf(searchArgument.ticker) === 0) {
-			results.push({
-				symbol: item.name,
-				full_name: item.full_name,
-				description: item.description,
-				exchange: item.exchange,
-				params: [],
-				type: item.type,
-				ticker: item.name
-			});
-		}
 
-		if (results.length >= maxSearchResults) {
-			break;
+		var positionInName = item.name.toUpperCase().indexOf(searchStringUpperCase);
+		var positionInDescription = item.description.toUpperCase().indexOf(searchStringUpperCase);
+
+		if (queryIsEmpty || positionInName >= 0 || positionInDescription >= 0) {
+			var found = false;
+			for (var resultIndex = 0; resultIndex < results.length; resultIndex++) {
+				if (results[resultIndex].item == item) {
+					found = true;
+					break;
+				}
+			}
+
+			if (!found) {
+				var weight = positionInName >= 0 ? positionInName : 8000 + positionInDescription;
+				results.push({ item: item, weight: weight });
+			}
 		}
 	}
 
-	searchArgument.onResultReadyCallback(results);
+	searchArgument.onResultReadyCallback(
+		results
+			.sort(function (weightedItem1, weightedItem2) {
+				return weightedItem1.weight - weightedItem2.weight;
+			})
+			.map(function (weightedItem) {
+				var item = weightedItem.item;
+				return {
+					symbol: item.name,
+					full_name: item.full_name,
+					description: item.description,
+					exchange: item.exchange,
+					params: [],
+					type: item.type,
+					ticker: item.name
+				};
+			})
+			.slice(0, Math.min(results.length, maxSearchResults))
+	);
 };
-
-
 
 //	==================================================================================================================================================
 //	==================================================================================================================================================
@@ -720,18 +717,18 @@ Datafeeds.DataPulseUpdater = function(datafeed, updateFrequency) {
 					if (isNewBar) {
 
 						if (bars.length < 2) {
-							throw "Not enough bars in history for proper pulse update. Need at least 2.";
+							throw 'Not enough bars in history for proper pulse update. Need at least 2.';
 						}
 
 						var previousBar = bars[bars.length - 2];
-						for (var i =0; i < subscribers.length; ++i) {
+						for (var i = 0; i < subscribers.length; ++i) {
 							subscribers[i](previousBar);
 						}
 					}
 
 					_subscriptionRecord.lastBarTime = lastBar.time;
 
-					for (var i =0; i < subscribers.length; ++i) {
+					for (var i = 0; i < subscribers.length; ++i) {
 						subscribers[i](lastBar);
 					}
 				},
@@ -745,23 +742,21 @@ Datafeeds.DataPulseUpdater = function(datafeed, updateFrequency) {
 		}
 	};
 
-	if (typeof updateFrequency != "undefined" && updateFrequency > 0) {
+	if (typeof updateFrequency != 'undefined' && updateFrequency > 0) {
 		setInterval(update, updateFrequency);
 	}
 };
 
-
 Datafeeds.DataPulseUpdater.prototype.unsubscribeDataListener = function(listenerGUID) {
-	this._datafeed._logMessage("Unsubscribing " + listenerGUID);
+	this._datafeed._logMessage('Unsubscribing ' + listenerGUID);
 	delete this._subscribers[listenerGUID];
 };
 
-
 Datafeeds.DataPulseUpdater.prototype.subscribeDataListener = function(symbolInfo, resolution, newDataCallback, listenerGUID) {
 
-	this._datafeed._logMessage("Subscribing " + listenerGUID);
+	this._datafeed._logMessage('Subscribing ' + listenerGUID);
 
-	var key = symbolInfo.name + ", " + resolution;
+	var key = symbolInfo.name + ', ' + resolution;
 
 	if (!this._subscribers.hasOwnProperty(listenerGUID)) {
 
@@ -776,26 +771,21 @@ Datafeeds.DataPulseUpdater.prototype.subscribeDataListener = function(symbolInfo
 	this._subscribers[listenerGUID].listeners.push(newDataCallback);
 };
 
-
 Datafeeds.DataPulseUpdater.prototype.periodLengthSeconds = function(resolution, requiredPeriodsCount) {
 	var daysCount = 0;
 
-	if (resolution == "D") {
+	if (resolution == 'D') {
 		daysCount = requiredPeriodsCount;
-	}
-	else if (resolution == "M") {
+	} else if (resolution == 'M') {
 		daysCount = 31 * requiredPeriodsCount;
-	}
-	else if (resolution == "W") {
+	} else if (resolution == 'W') {
 		daysCount = 7 * requiredPeriodsCount;
-	}
-	else {
+	} else {
 		daysCount = requiredPeriodsCount * resolution / (24 * 60);
 	}
 
 	return daysCount * 24 * 60 * 60;
 };
-
 
 Datafeeds.QuotesPulseUpdater = function(datafeed) {
 	this._datafeed = datafeed;
@@ -823,6 +813,7 @@ Datafeeds.QuotesPulseUpdater.prototype.subscribeDataListener = function(symbols,
 			listeners: []
 		};
 	}
+
 	this._subscribers[listenerGUID].listeners.push(newDataCallback);
 };
 
@@ -841,8 +832,9 @@ Datafeeds.QuotesPulseUpdater.prototype._updateQuotes = function(symbolsGetter) {
 
 		var subscriptionRecord = this._subscribers[listenerGUID];
 		this._datafeed.getQuotes(symbolsGetter(subscriptionRecord),
+
 			// onDataCallback
-			function(subscribers, guid) {
+			(function(subscribers, guid) {
 				return function(data) {
 					that._requestsPending--;
 
@@ -851,11 +843,11 @@ Datafeeds.QuotesPulseUpdater.prototype._updateQuotes = function(symbolsGetter) {
 						return;
 					}
 
-					for (var i =0; i < subscribers.length; ++i) {
+					for (var i = 0; i < subscribers.length; ++i) {
 						subscribers[i](data);
 					}
 				};
-			}(subscriptionRecord.listeners, listenerGUID), //jshint ignore:line
+			}(subscriptionRecord.listeners, listenerGUID)), //jshint ignore:line
 			// onErrorCallback
 			function (error) {
 				that._requestsPending--;
