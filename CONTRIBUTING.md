@@ -6,6 +6,7 @@
 * Report a version of the library. You can check it with `TradingView.version()` from the browser console
 * Report a device/browser where the issue can be replicated
 * Provide step-by-step way to reproduce the issue
+* Provide a code example
 * Give a link to your Charting Library where we can reproduce it
 
 ##Asking a question
