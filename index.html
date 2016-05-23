@@ -24,7 +24,7 @@
 
 			TradingView.onready(function()
 			{
-				var widget = new TradingView.widget({
+				var widget = window.tvWidget = new TradingView.widget({
 					fullscreen: true,
 					symbol: 'AA',
 					interval: 'D',
