@@ -152,7 +152,7 @@
 					widget.createButton()
 						.on('click', function (e) {
 							if (savedTemplate) {
-								widget.applyStudyTemplate(savedTemplate);
+								widget.chart().applyStudyTemplate(savedTemplate);
 							}
 						 })
 						.append($('<span>apply template</span>'));
@@ -168,14 +168,14 @@
 
 					widget.createButton()
 						.on('click', function (e) {
-							widget.clearMarks();
+							widget.chart().clearMarks();
 						 })
 						.append($('<span>Clear marks</span>'));
 
 					widget.createButton()
 						.attr('title', "Add item")
 						.on('click', function (e) {
-							widget.createStudy("Bollinger Bands", false, false, [
+							widget.chart().createStudy("Bollinger Bands", false, false, [
 									10 + parseInt(Math.random() * 10),
 									3 + parseInt(Math.random() * 3)
 								], function (guid) {
@@ -188,7 +188,7 @@
 					widget.createButton({align: "right"})
 						.attr('title', "Add item")
 						.on('click', function (e) {
-							widget.createStudy("Moving Average", false, false, [
+							widget.chart().createStudy("Moving Average", false, false, [
 									10 + parseInt(Math.random() * 10)
 								], function (guid) {
 									console.log(guid);
@@ -200,7 +200,7 @@
 						widget.createButton({align: "right"})
 						.attr('title', "Add item")
 						.on('click', function (e) {
-							widget.createStudy("Moving Average", false, false, [
+							widget.chart().createStudy("Moving Average", false, false, [
 									10 + parseInt(Math.random() * 10)
 								], function (guid) {
 									console.log(guid);
@@ -213,26 +213,26 @@
 					widget.createButton({align: "right"})
 						.attr('title', "Add item")
 						.on('click', function (e) {
-							widget.createStudy('Stochastic', false, false, [12, 3, 3], null, {"%d.color" : "#000000", "%k.color" : "#00FF00"});
+							widget.chart().createStudy('Stochastic', false, false, [12, 3, 3], null, {"%d.color" : "#000000", "%k.color" : "#00FF00"});
 						 })
 						.append($('<span>+Stoch</span>'));
 
 
 					widget.createButton()
 						.on('click', function (e) {
-							widget.createOrderLine();
+							widget.chart().createOrderLine();
 						 })
 						.append($('<span>new order</span>'));
 
 					widget.createButton()
 						.on('click', function (e) {
-							widget.removeAllStudies();
+							widget.chart().removeAllStudies();
 						 })
 						.append($('<span>rm all studies</span>'));
 
 					widget.createButton()
 						.on('click', function (e) {
-							widget.removeAllShapes();
+							widget.chart().removeAllShapes();
 						 })
 						.append($('<span>rm all shapes</span>'));
 
@@ -240,17 +240,17 @@
 						alert("You are not permitted to use " + x.name + "(" + x.type + ")");
 					});
 
-					widget.onIntervalChange(function(x) {
+					widget.subscribe('onIntervalChange', function(x) {
 						console.log("onIntervalChange: " + x);
 					});
 
                     widget.onShortcut("alt+s", function() {
-                        widget.executeActionById("symbolSearch");
+                        widget.chart().executeActionById("symbolSearch");
                     });
 
 					widget.createButton()
 						.on('click', function (e) {
-							widget.setVisibleRange({
+							widget.chart().setVisibleRange({
 								from: Date.UTC(2012, 2, 3) / 1000,
 								to: Date.UTC(2013, 3, 3) / 1000
 							});

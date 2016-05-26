@@ -15,6 +15,13 @@
 
 		<script type="text/javascript">
 
+			function getParameterByName(name) {
+			    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+			    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+			            results = regex.exec(location.search);
+			    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+			}
+
 			TradingView.onready(function()
 			{
 				var widget = new TradingView.widget({
@@ -25,7 +32,7 @@
 					//	BEWARE: no trailing slash is expected in feed URL
 					datafeed: new Datafeeds.UDFCompatibleDatafeed("https://demo_feed.tradingview.com"),
 					library_path: "charting_library/",
-					locale: "en",
+					locale: getParameterByName('lang') || "en",
 					//	Regression Trend-related functionality is not implemented yet, so it's hidden for a while
 					drawings_access: { type: 'black', tools: [ { name: "Regression Trend" } ] },
 					disabled_features: ["use_localstorage_for_settings"],
