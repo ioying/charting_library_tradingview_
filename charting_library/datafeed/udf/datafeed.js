@@ -8,7 +8,7 @@
 
 var Datafeeds = {};
 
-Datafeeds.UDFCompatibleDatafeed = function(datafeedURL, updateFrequency, protocolVersion) {
+Datafeeds.UDFCompatibleDatafeed = function(datafeedURL, updateFrequency) {
 	this._datafeedURL = datafeedURL;
 	this._configuration = undefined;
 
@@ -16,7 +16,6 @@ Datafeeds.UDFCompatibleDatafeed = function(datafeedURL, updateFrequency, protoco
 	this._symbolsStorage = null;
 	this._barsPulseUpdater = new Datafeeds.DataPulseUpdater(this, updateFrequency || 10 * 1000);
 	this._quotesPulseUpdater = new Datafeeds.QuotesPulseUpdater(this);
-	this._protocolVersion = protocolVersion || 2;
 
 	this._enableLogging = false;
 	this._initializationFinished = false;
@@ -315,8 +314,6 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolut
 		throw new Error(['Got a JS time instead of Unix one.', rangeStartDate, rangeEndDate]);
 	}
 
-	var that = this;
-
 	this._send(this._datafeedURL + this._historyURL, {
 		symbol: symbolInfo.ticker.toUpperCase(),
 		resolution: resolution,
@@ -366,7 +363,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolut
 			bars.push(barValue);
 		}
 
-		onDataCallback(bars, { version: that._protocolVersion, noData: nodata, nextTime: data.nb || data.nextTime });
+		onDataCallback(bars, { noData: nodata, nextTime: data.nb || data.nextTime });
 	})
 	.fail(function(arg) {
 		console.warn(['getBars(): HTTP error', arg]);
@@ -377,8 +374,8 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolut
 	});
 };
 
-Datafeeds.UDFCompatibleDatafeed.prototype.subscribeBars = function(symbolInfo, resolution, onRealtimeCallback, listenerGUID) {
-	this._barsPulseUpdater.subscribeDataListener(symbolInfo, resolution, onRealtimeCallback, listenerGUID);
+Datafeeds.UDFCompatibleDatafeed.prototype.subscribeBars = function(symbolInfo, resolution, onRealtimeCallback, listenerGUID, onResetCacheNeededCallback) {
+	this._barsPulseUpdater.subscribeDataListener(symbolInfo, resolution, onRealtimeCallback, listenerGUID, onResetCacheNeededCallback);
 };
 
 Datafeeds.UDFCompatibleDatafeed.prototype.unsubscribeBars = function(listenerGUID) {
