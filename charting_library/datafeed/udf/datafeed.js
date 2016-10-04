@@ -8,8 +8,7 @@
 
 var Datafeeds = {};
 
-Datafeeds.UDFCompatibleDatafeed = function(datafeedURL, updateFrequency, protocolVersion) {
-
+Datafeeds.UDFCompatibleDatafeed = function(datafeedURL, updateFrequency) {
 	this._datafeedURL = datafeedURL;
 	this._configuration = undefined;
 
@@ -17,7 +16,6 @@ Datafeeds.UDFCompatibleDatafeed = function(datafeedURL, updateFrequency, protoco
 	this._symbolsStorage = null;
 	this._barsPulseUpdater = new Datafeeds.DataPulseUpdater(this, updateFrequency || 10 * 1000);
 	this._quotesPulseUpdater = new Datafeeds.QuotesPulseUpdater(this);
-	this._protocolVersion = protocolVersion || 2;
 
 	this._enableLogging = false;
 	this._initializationFinished = false;
@@ -39,17 +37,15 @@ Datafeeds.UDFCompatibleDatafeed.prototype.defaultConfiguration = function() {
 Datafeeds.UDFCompatibleDatafeed.prototype.getServerTime = function(callback) {
 	if (this._configuration.supports_time) {
 		this._send(this._datafeedURL + '/time', {})
-			.done(function (response) {
+			.done(function(response) {
 				callback(+response);
 			})
 			.fail(function() {
-
 			});
 	}
 };
 
-Datafeeds.UDFCompatibleDatafeed.prototype.on = function (event, callback) {
-
+Datafeeds.UDFCompatibleDatafeed.prototype.on = function(event, callback) {
 	if (!this._callbacks.hasOwnProperty(event)) {
 		this._callbacks[event] = [];
 	}
@@ -101,7 +97,6 @@ Datafeeds.UDFCompatibleDatafeed.prototype._send = function(url, params) {
 };
 
 Datafeeds.UDFCompatibleDatafeed.prototype._initialize = function() {
-
 	var that = this;
 
 	this._send(this._datafeedURL + '/config')
@@ -143,7 +138,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype._setupWithConfiguration = function(con
 	configurationData.symbols_types = symbolsTypes;
 
 	if (!configurationData.supports_search && !configurationData.supports_group_request) {
-		throw 'Unsupported datafeed configuration. Must either support search, or support group request';
+		throw new Error('Unsupported datafeed configuration. Must either support search, or support group request');
 	}
 
 	if (!configurationData.supports_search) {
@@ -164,15 +159,15 @@ Datafeeds.UDFCompatibleDatafeed.prototype._setupWithConfiguration = function(con
 //	===============================================================================================================================
 //	The functions set below is the implementation of JavaScript API.
 
-Datafeeds.UDFCompatibleDatafeed.prototype.getMarks = function (symbolInfo, rangeStart, rangeEnd, onDataCallback, resolution) {
+Datafeeds.UDFCompatibleDatafeed.prototype.getMarks = function(symbolInfo, rangeStart, rangeEnd, onDataCallback, resolution) {
 	if (this._configuration.supports_marks) {
 		this._send(this._datafeedURL + '/marks', {
-				symbol: symbolInfo.ticker.toUpperCase(),
-				from: rangeStart,
-				to: rangeEnd,
-				resolution: resolution
-			})
-			.done(function (response) {
+			symbol: symbolInfo.ticker.toUpperCase(),
+			from: rangeStart,
+			to: rangeEnd,
+			resolution: resolution
+		})
+			.done(function(response) {
 				onDataCallback(JSON.parse(response));
 			})
 			.fail(function() {
@@ -181,7 +176,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getMarks = function (symbolInfo, range
 	}
 };
 
-Datafeeds.UDFCompatibleDatafeed.prototype.getTimescaleMarks = function (symbolInfo, rangeStart, rangeEnd, onDataCallback, resolution) {
+Datafeeds.UDFCompatibleDatafeed.prototype.getTimescaleMarks = function(symbolInfo, rangeStart, rangeEnd, onDataCallback, resolution) {
 	if (this._configuration.supports_timescale_marks) {
 		this._send(this._datafeedURL + '/timescale_marks', {
 			symbol: symbolInfo.ticker.toUpperCase(),
@@ -189,7 +184,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getTimescaleMarks = function (symbolIn
 			to: rangeEnd,
 			resolution: resolution
 		})
-			.done(function (response) {
+			.done(function(response) {
 				onDataCallback(JSON.parse(response));
 			})
 			.fail(function() {
@@ -207,14 +202,13 @@ Datafeeds.UDFCompatibleDatafeed.prototype.searchSymbols = function(searchString,
 	}
 
 	if (this._configuration.supports_search) {
-
 		this._send(this._datafeedURL + '/search', {
-				limit: MAX_SEARCH_RESULTS,
-				query: searchString.toUpperCase(),
-				type: type,
-				exchange: exchange
-			})
-			.done(function (response) {
+			limit: MAX_SEARCH_RESULTS,
+			query: searchString.toUpperCase(),
+			type: type,
+			exchange: exchange
+		})
+			.done(function(response) {
 				var data = JSON.parse(response);
 
 				for (var i = 0; i < data.length; ++i) {
@@ -223,20 +217,18 @@ Datafeeds.UDFCompatibleDatafeed.prototype.searchSymbols = function(searchString,
 					}
 				}
 
-				if (typeof data.s == 'undefined' || data.s != 'error') {
+				if (typeof data.s == 'undefined' || data.s !== 'error') {
 					onResultReadyCallback(data);
 				} else {
 					onResultReadyCallback([]);
 				}
-
 			})
 			.fail(function(reason) {
 				onResultReadyCallback([]);
 			});
 	} else {
-
 		if (!this._symbolSearch) {
-			throw 'Datafeed error: inconsistent configuration (symbol search)';
+			throw new Error('Datafeed error: inconsistent configuration (symbol search)');
 		}
 
 		var searchArgument = {
@@ -249,7 +241,6 @@ Datafeeds.UDFCompatibleDatafeed.prototype.searchSymbols = function(searchString,
 		if (this._initializationFinished) {
 			this._symbolSearch.searchSymbols(searchArgument, MAX_SEARCH_RESULTS);
 		} else {
-
 			var that = this;
 
 			this.on('initialized', function() {
@@ -263,7 +254,6 @@ Datafeeds.UDFCompatibleDatafeed.prototype._symbolResolveURL = '/symbols';
 
 //	BEWARE: this function does not consider symbol's exchange
 Datafeeds.UDFCompatibleDatafeed.prototype.resolveSymbol = function(symbolName, onSymbolResolvedCallback, onResolveErrorCallback) {
-
 	var that = this;
 
 	if (!this._initializationFinished) {
@@ -290,12 +280,12 @@ Datafeeds.UDFCompatibleDatafeed.prototype.resolveSymbol = function(symbolName, o
 
 	if (!this._configuration.supports_group_request) {
 		this._send(this._datafeedURL + this._symbolResolveURL, {
-				symbol: symbolName ? symbolName.toUpperCase() : ''
-			})
-			.done(function (response) {
+			symbol: symbolName ? symbolName.toUpperCase() : ''
+		})
+			.done(function(response) {
 				var data = JSON.parse(response);
 
-				if (data.s && data.s != 'ok') {
+				if (data.s && data.s !== 'ok') {
 					onResolveErrorCallback('unknown_symbol');
 				} else {
 					onResultReady(data);
@@ -319,15 +309,10 @@ Datafeeds.UDFCompatibleDatafeed.prototype.resolveSymbol = function(symbolName, o
 Datafeeds.UDFCompatibleDatafeed.prototype._historyURL = '/history';
 
 Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolution, rangeStartDate, rangeEndDate, onDataCallback, onErrorCallback) {
-
 	//	timestamp sample: 1399939200
 	if (rangeStartDate > 0 && (rangeStartDate + '').length > 10) {
-		throw ['Got a JS time instead of Unix one.', rangeStartDate, rangeEndDate];
+		throw new Error(['Got a JS time instead of Unix one.', rangeStartDate, rangeEndDate]);
 	}
-
-	var that = this;
-
-	var requestStartTime = Date.now();
 
 	this._send(this._datafeedURL + this._historyURL, {
 		symbol: symbolInfo.ticker.toUpperCase(),
@@ -335,13 +320,12 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolut
 		from: rangeStartDate,
 		to: rangeEndDate
 	})
-	.done(function (response) {
-
+	.done(function(response) {
 		var data = JSON.parse(response);
 
-		var nodata = data.s == 'no_data';
+		var nodata = data.s === 'no_data';
 
-		if (data.s != 'ok' && !nodata) {
+		if (data.s !== 'ok' && !nodata) {
 			if (!!onErrorCallback) {
 				onErrorCallback(data.s);
 			}
@@ -359,7 +343,6 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolut
 		var ohlPresent = typeof data.o != 'undefined';
 
 		for (var i = 0; i < barsCount; ++i) {
-
 			var barValue = {
 				time: data.t[i] * 1000,
 				close: data.c[i]
@@ -380,9 +363,9 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolut
 			bars.push(barValue);
 		}
 
-		onDataCallback(bars, {version: that._protocolVersion, noData: nodata, nextTime: data.nb || data.nextTime});
+		onDataCallback(bars, { noData: nodata, nextTime: data.nb || data.nextTime });
 	})
-	.fail(function (arg) {
+	.fail(function(arg) {
 		console.warn(['getBars(): HTTP error', arg]);
 
 		if (!!onErrorCallback) {
@@ -391,8 +374,8 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getBars = function(symbolInfo, resolut
 	});
 };
 
-Datafeeds.UDFCompatibleDatafeed.prototype.subscribeBars = function(symbolInfo, resolution, onRealtimeCallback, listenerGUID) {
-	this._barsPulseUpdater.subscribeDataListener(symbolInfo, resolution, onRealtimeCallback, listenerGUID);
+Datafeeds.UDFCompatibleDatafeed.prototype.subscribeBars = function(symbolInfo, resolution, onRealtimeCallback, listenerGUID, onResetCacheNeededCallback) {
+	this._barsPulseUpdater.subscribeDataListener(symbolInfo, resolution, onRealtimeCallback, listenerGUID, onResetCacheNeededCallback);
 };
 
 Datafeeds.UDFCompatibleDatafeed.prototype.unsubscribeBars = function(listenerGUID) {
@@ -404,9 +387,9 @@ Datafeeds.UDFCompatibleDatafeed.prototype.calculateHistoryDepth = function(perio
 
 Datafeeds.UDFCompatibleDatafeed.prototype.getQuotes = function(symbols, onDataCallback, onErrorCallback) {
 	this._send(this._datafeedURL + '/quotes', { symbols: symbols })
-		.done(function (response) {
+		.done(function(response) {
 			var data = JSON.parse(response);
-			if (data.s == 'ok') {
+			if (data.s === 'ok') {
 				//	JSON format is {s: "status", [{s: "symbol_status", n: "symbol_name", v: {"field1": "value1", "field2": "value2", ..., "fieldN": "valueN"}}]}
 				if (onDataCallback) {
 					onDataCallback(data.d);
@@ -417,7 +400,7 @@ Datafeeds.UDFCompatibleDatafeed.prototype.getQuotes = function(symbols, onDataCa
 				}
 			}
 		})
-		.fail(function (arg) {
+		.fail(function(arg) {
 			if (onErrorCallback) {
 				onErrorCallback('network error: ' + arg);
 			}
@@ -455,12 +438,9 @@ Datafeeds.SymbolsStorage = function(datafeed) {
 };
 
 Datafeeds.SymbolsStorage.prototype._requestFullSymbolsList = function() {
-
 	var that = this;
-	var datafeed = this._datafeed;
 
 	for (var i = 0; i < this._exchangesList.length; ++i) {
-
 		var exchange = this._exchangesList[i];
 
 		if (this._exchangesDataCache.hasOwnProperty(exchange)) {
@@ -472,34 +452,31 @@ Datafeeds.SymbolsStorage.prototype._requestFullSymbolsList = function() {
 		this._exchangesWaitingForData[exchange] = 'waiting_for_data';
 
 		this._datafeed._send(this._datafeed._datafeedURL + '/symbol_info', {
-				group: exchange
-			})
+			group: exchange
+		})
 			.done(function(exchange) {
 				return function(response) {
 					that._onExchangeDataReceived(exchange, JSON.parse(response));
 					that._onAnyExchangeResponseReceived(exchange);
 				};
-			}(exchange)) //jshint ignore:line
+			})(exchange)
 			.fail(function(exchange) {
-				return function (reason) {
+				return function(reason) {
 					that._onAnyExchangeResponseReceived(exchange);
 				};
-			}(exchange)); //jshint ignore:line
+			})(exchange);
 	}
 };
 
 Datafeeds.SymbolsStorage.prototype._onExchangeDataReceived = function(exchangeName, data) {
-
 	function tableField(data, name, index) {
 		return data[name] instanceof Array ?
 			data[name][index] :
 			data[name];
 	}
 
-	try
-	{
+	try	{
 		for (var symbolIndex = 0; symbolIndex < data.symbol.length; ++symbolIndex) {
-
 			var symbolName = data.symbol[symbolIndex];
 			var listedExchange = tableField(data, 'exchange-listed', symbolIndex);
 			var tradedExchange = tableField(data, 'exchange-traded', symbolIndex);
@@ -544,14 +521,12 @@ Datafeeds.SymbolsStorage.prototype._onExchangeDataReceived = function(exchangeNa
 			this._symbolsInfo[symbolInfo.ticker] = this._symbolsInfo[symbolName] = this._symbolsInfo[fullName] = symbolInfo;
 			this._symbolsList.push(symbolName);
 		}
-	}
-	catch (error) {
-		throw 'API error when processing exchange `' + exchangeName + '` symbol #' + symbolIndex + ': ' + error;
+	} catch (error) {
+		throw new Error('API error when processing exchange `' + exchangeName + '` symbol #' + symbolIndex + ': ' + error);
 	}
 };
 
 Datafeeds.SymbolsStorage.prototype._onAnyExchangeResponseReceived = function(exchangeName) {
-
 	delete this._exchangesWaitingForData[exchangeName];
 
 	var allDataReady = Object.keys(this._exchangesWaitingForData).length === 0;
@@ -592,9 +567,8 @@ Datafeeds.SymbolSearchComponent = function(datafeed) {
 
 //	searchArgument = { searchString, onResultReadyCallback}
 Datafeeds.SymbolSearchComponent.prototype.searchSymbols = function(searchArgument, maxSearchResults) {
-
 	if (!this._datafeed._symbolsStorage) {
-		throw 'Cannot use local symbol search when no groups information is available';
+		throw new Error('Cannot use local symbol search when no groups information is available');
 	}
 
 	var symbolsStorage = this._datafeed._symbolsStorage;
@@ -607,11 +581,11 @@ Datafeeds.SymbolSearchComponent.prototype.searchSymbols = function(searchArgumen
 		var symbolName = symbolsStorage._symbolsList[i];
 		var item = symbolsStorage._symbolsInfo[symbolName];
 
-		if (searchArgument.type && searchArgument.type.length > 0 && item.type != searchArgument.type) {
+		if (searchArgument.type && searchArgument.type.length > 0 && item.type !== searchArgument.type) {
 			continue;
 		}
 
-		if (searchArgument.exchange && searchArgument.exchange.length > 0 && item.exchange != searchArgument.exchange) {
+		if (searchArgument.exchange && searchArgument.exchange.length > 0 && item.exchange !== searchArgument.exchange) {
 			continue;
 		}
 
@@ -621,7 +595,7 @@ Datafeeds.SymbolSearchComponent.prototype.searchSymbols = function(searchArgumen
 		if (queryIsEmpty || positionInName >= 0 || positionInDescription >= 0) {
 			var found = false;
 			for (var resultIndex = 0; resultIndex < results.length; resultIndex++) {
-				if (results[resultIndex].item == item) {
+				if (results[resultIndex].item === item) {
 					found = true;
 					break;
 				}
@@ -636,10 +610,10 @@ Datafeeds.SymbolSearchComponent.prototype.searchSymbols = function(searchArgumen
 
 	searchArgument.onResultReadyCallback(
 		results
-			.sort(function (weightedItem1, weightedItem2) {
+			.sort(function(weightedItem1, weightedItem2) {
 				return weightedItem1.weight - weightedItem2.weight;
 			})
-			.map(function (weightedItem) {
+			.map(function(weightedItem) {
 				var item = weightedItem.item;
 				return {
 					symbol: item.name,
@@ -687,8 +661,7 @@ Datafeeds.DataPulseUpdater = function(datafeed, updateFrequency) {
 
 			that._requestsPending++;
 
-			(function(_subscriptionRecord) {
-
+			(function(_subscriptionRecord) { // eslint-disable-line
 				that._datafeed.getBars(_subscriptionRecord.symbolInfo, resolution, datesRangeLeft, datesRangeRight, function(bars) {
 					that._requestsPending--;
 
@@ -715,9 +688,8 @@ Datafeeds.DataPulseUpdater = function(datafeed, updateFrequency) {
 					//	Pulse updating may miss some trades data (ie, if pulse period = 10 secods and new bar is started 5 seconds later after the last update, the
 					//	old bar's last 5 seconds trades will be lost). Thus, at fist we should broadcast old bar updates when it's ready.
 					if (isNewBar) {
-
 						if (bars.length < 2) {
-							throw 'Not enough bars in history for proper pulse update. Need at least 2.';
+							throw new Error('Not enough bars in history for proper pulse update. Need at least 2.');
 						}
 
 						var previousBar = bars[bars.length - 2];
@@ -737,8 +709,7 @@ Datafeeds.DataPulseUpdater = function(datafeed, updateFrequency) {
 				function() {
 					that._requestsPending--;
 				});
-			})(subscriptionRecord); //jshint ignore:line
-
+			})(subscriptionRecord);
 		}
 	};
 
@@ -753,13 +724,9 @@ Datafeeds.DataPulseUpdater.prototype.unsubscribeDataListener = function(listener
 };
 
 Datafeeds.DataPulseUpdater.prototype.subscribeDataListener = function(symbolInfo, resolution, newDataCallback, listenerGUID) {
-
 	this._datafeed._logMessage('Subscribing ' + listenerGUID);
 
-	var key = symbolInfo.name + ', ' + resolution;
-
 	if (!this._subscribers.hasOwnProperty(listenerGUID)) {
-
 		this._subscribers[listenerGUID] = {
 			symbolInfo: symbolInfo,
 			resolution: resolution,
@@ -774,11 +741,11 @@ Datafeeds.DataPulseUpdater.prototype.subscribeDataListener = function(symbolInfo
 Datafeeds.DataPulseUpdater.prototype.periodLengthSeconds = function(resolution, requiredPeriodsCount) {
 	var daysCount = 0;
 
-	if (resolution == 'D') {
+	if (resolution === 'D') {
 		daysCount = requiredPeriodsCount;
-	} else if (resolution == 'M') {
+	} else if (resolution === 'M') {
 		daysCount = 31 * requiredPeriodsCount;
-	} else if (resolution == 'W') {
+	} else if (resolution === 'W') {
 		daysCount = 7 * requiredPeriodsCount;
 	} else {
 		daysCount = requiredPeriodsCount * resolution / (24 * 60);
@@ -834,7 +801,7 @@ Datafeeds.QuotesPulseUpdater.prototype._updateQuotes = function(symbolsGetter) {
 		this._datafeed.getQuotes(symbolsGetter(subscriptionRecord),
 
 			// onDataCallback
-			(function(subscribers, guid) {
+			(function(subscribers, guid) { // eslint-disable-line
 				return function(data) {
 					that._requestsPending--;
 
@@ -847,10 +814,10 @@ Datafeeds.QuotesPulseUpdater.prototype._updateQuotes = function(symbolsGetter) {
 						subscribers[i](data);
 					}
 				};
-			}(subscriptionRecord.listeners, listenerGUID)), //jshint ignore:line
+			}(subscriptionRecord.listeners, listenerGUID)),
 			// onErrorCallback
-			function (error) {
+			function(error) {
 				that._requestsPending--;
-			}); //jshint ignore:line
+			});
 	}
 };
